@@ -668,21 +668,13 @@ let state = {
   finished: false,
 };
 
-let currentAudio = null;
-
-function speak(text, lang) {
-  if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-  const langCode = lang === "de-DE" ? "de" : "it";
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=${langCode}&client=tw-ob`;
-  currentAudio = new Audio(url);
-  currentAudio.play().catch(() => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utt = new SpeechSynthesisUtterance(text);
-    utt.lang = lang;
-    utt.rate = 0.82;
-    speechSynthesis.speak(utt);
-  });
+function speak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = "de-DE";
+  utt.rate = 0.82;
+  speechSynthesis.speak(utt);
 }
 
 function toggleDirection() {
@@ -861,11 +853,8 @@ function render() {
 
   if (!state.finished && !state.animating) {
     const c = state.deck[state.index];
-    if (state.flipped) {
-      speak(isDeIt ? c.it : c.de, isDeIt ? "it-IT" : "de-DE");
-    } else {
-      speak(isDeIt ? c.de : c.it, isDeIt ? "de-DE" : "it-IT");
-    }
+    const germanVisible = isDeIt ? !state.flipped : state.flipped;
+    if (germanVisible) speak(c.de);
   }
 }
 
