@@ -270,6 +270,24 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  .dir-toggle {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 2px solid var(--light);
+    background: var(--white);
+    color: var(--black);
+    cursor: pointer;
+    margin-top: 12px;
+    letter-spacing: 0.5px;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.18s;
+  }
+  .dir-toggle:active { transform: scale(0.96); }
+  .dir-toggle.reversed { background: var(--black); color: var(--white); border-color: var(--black); }
+
   /* Finished screen */
   .finished {
     width: min(440px, 90vw);
@@ -651,11 +669,27 @@ let state = {
   deck: shuffle(CARDS["sostantivi"]),
   index: 0,
   flipped: false,
+  direction: "de-it",
   known: new Set(),
   unknown: new Set(),
   animating: false,
   finished: false,
 };
+
+function speak(text, lang) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = lang;
+  utt.rate = 0.9;
+  speechSynthesis.speak(utt);
+}
+
+function toggleDirection() {
+  state.direction = state.direction === "de-it" ? "it-de" : "de-it";
+  state.flipped = false;
+  render();
+}
 
 function setCategory(cat) {
   state.category = cat;
@@ -727,6 +761,36 @@ function render() {
         </div>`).join("")}
     </div>` : "";
 
+  const isDeIt = state.direction === "de-it";
+
+  let frontContent, backContent;
+  if (isDeIt) {
+    frontContent = `
+      ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
+      ${isVerbi ? `<div class="verb-label">VERBO</div>` : ""}
+      <div class="german-word">${card.de || ""}</div>
+      ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
+      <div class="tap-hint">↕ tocca per girare</div>
+    `;
+    backContent = `
+      <div class="back-label">🇮🇹 in italiano</div>
+      <div class="italian-word">${card.it || ""}</div>
+    `;
+  } else {
+    frontContent = `
+      <div class="back-label" style="color:#aaa">🇮🇹 italiano</div>
+      <div class="german-word">${card.it || ""}</div>
+      <div class="tap-hint">↕ tocca per girare</div>
+    `;
+    backContent = `
+      <div class="back-label">🇩🇪 in tedesco</div>
+      ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
+      ${isVerbi ? `<div class="verb-label">VERBO</div>` : ""}
+      <div class="italian-word">${card.de || ""}</div>
+      ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
+    `;
+  }
+
   const cardAreaHTML = state.finished ? `
     <div class="finished">
       <div class="finished-emoji">🎉</div>
@@ -741,17 +805,8 @@ function render() {
   ` : `
     <div class="card-wrapper" onclick="flipCard()">
       <div class="card-inner ${state.flipped ? "flipped" : ""}" id="card-inner">
-        <div class="card-face card-front">
-          ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
-          ${isVerbi ? `<div class="verb-label">VERBO</div>` : ""}
-          <div class="german-word">${card.de || ""}</div>
-          ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
-          <div class="tap-hint">↕ tocca per girare</div>
-        </div>
-        <div class="card-face card-back">
-          <div class="back-label">🇮🇹 in italiano</div>
-          <div class="italian-word">${card.it || ""}</div>
-        </div>
+        <div class="card-face card-front">${frontContent}</div>
+        <div class="card-face card-back">${backContent}</div>
       </div>
     </div>
   `;
@@ -768,6 +823,9 @@ function render() {
     <div class="header">
       <div class="title">Deutsch Lernen</div>
       <div class="subtitle">Flashcard per imparare il tedesco</div>
+      <button class="dir-toggle ${isDeIt ? "" : "reversed"}" onclick="toggleDirection()">
+        ${isDeIt ? "🇩🇪 → 🇮🇹" : "🇮🇹 → 🇩🇪"}
+      </button>
     </div>
 
     <div class="categories">
@@ -802,6 +860,15 @@ function render() {
 
     <div class="footer">${total} parole · Tocca la carta per girarla · 100% offline</div>
   `;
+
+  if (!state.finished && !state.animating) {
+    const c = state.deck[state.index];
+    if (state.flipped) {
+      speak(isDeIt ? c.it : c.de, isDeIt ? "it-IT" : "de-DE");
+    } else {
+      speak(isDeIt ? c.de : c.it, isDeIt ? "de-DE" : "it-IT");
+    }
+  }
 }
 
 // Keyboard support
