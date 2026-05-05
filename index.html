@@ -676,12 +676,33 @@ let state = {
   finished: false,
 };
 
+let voiceCache = {};
+
+function loadVoices() {
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+  ["de-DE", "it-IT"].forEach(lang => {
+    const prefix = lang.slice(0, 2);
+    const candidates = voices.filter(v => v.lang.startsWith(prefix));
+    // prefer enhanced/local (downloaded) voices
+    voiceCache[lang] =
+      candidates.find(v => v.name.includes("Enhanced")) ||
+      candidates.find(v => v.name.includes("Premium")) ||
+      candidates.find(v => v.localService) ||
+      candidates[0] || null;
+  });
+}
+
+speechSynthesis.addEventListener("voiceschanged", loadVoices);
+loadVoices();
+
 function speak(text, lang) {
   if (!window.speechSynthesis) return;
   window.speechSynthesis.cancel();
   const utt = new SpeechSynthesisUtterance(text);
   utt.lang = lang;
-  utt.rate = 0.9;
+  utt.rate = 0.82;
+  if (voiceCache[lang]) utt.voice = voiceCache[lang];
   speechSynthesis.speak(utt);
 }
 
