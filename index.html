@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Deutsch">
+<title>Deutsch Lernen</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f0e8;
+    --white: #ffffff;
+    --black: #1a1a1a;
+    --muted: #888;
+    --light: #e0d9cc;
+    --der: #2563eb;
+    --die: #dc2626;
+    --das: #16a34a;
+    --known: #16a34a;
+    --unknown: #dc2626;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    font-family: Georgia, 'Times New Roman', serif;
+    color: var(--black);
+    overscroll-behavior: none;
+  }
+
+  .app {
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 40px;
+  }
+
+  /* Header */
+  .header {
+    width: 100%;
+    text-align: center;
+    padding: 36px 24px 0;
+  }
+  .title {
+    font-size: clamp(2rem, 8vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+  .subtitle {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 5px;
+  }
+
+  /* Categories */
+  .categories {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 24px 16px 0;
+  }
+  .cat-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: 30px;
+    border: 2px solid transparent;
+    cursor: pointer;
+    background: var(--white);
+    color: #555;
+    transition: all 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cat-btn:active { transform: scale(0.96); }
+  .cat-btn.active {
+    background: var(--black);
+    color: var(--white);
+    border-color: var(--black);
+  }
+
+  /* Genus legend */
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-weight: 500; }
+  .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* Progress */
+  .progress-wrap {
+    width: min(440px, 90vw);
+    margin-top: 24px;
+  }
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .stats { display: flex; gap: 16px; }
+  .stat { display: flex; align-items: center; gap: 5px; font-weight: 700; }
+  .stat-dot { width: 7px; height: 7px; border-radius: 50%; }
+  .progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--light);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--black);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* Card */
+  .card-area { margin-top: 24px; }
+  .card-wrapper {
+    width: min(440px, 90vw);
+    height: 250px;
+    perspective: 1200px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-inner.flipped { transform: rotateY(180deg); }
+  .card-inner.go-left {
+    animation: goLeft 0.28s ease forwards;
+  }
+  .card-inner.go-right {
+    animation: goRight 0.28s ease forwards;
+  }
+  @keyframes goLeft {
+    to { opacity: 0; transform: translateX(-60px); }
+  }
+  @keyframes goRight {
+    to { opacity: 0; transform: translateX(60px); }
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .card-front { background: var(--white); }
+  .card-back { background: var(--black); transform: rotateY(180deg); }
+
+  .article-badge {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 3px 13px;
+    border-radius: 20px;
+    color: white;
+    margin-bottom: 12px;
+  }
+  .verb-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ccc;
+    margin-bottom: 8px;
+  }
+  .german-word {
+    font-size: clamp(1.7rem, 6vw, 2.5rem);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+    color: var(--black);
+  }
+  .verb-nota {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.72rem;
+    color: #aaa;
+    margin-top: 8px;
+    text-align: center;
+    font-style: italic;
+  }
+  .tap-hint {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ccc;
+    margin-top: 18px;
+  }
+  .back-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #666;
+    margin-bottom: 12px;
+  }
+  .italian-word {
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 700;
+    text-align: center;
+    color: #f5f0e8;
+    line-height: 1.2;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .action-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 13px 26px;
+    border-radius: 14px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .action-btn:active { transform: scale(0.95); }
+  .btn-known { background: var(--known); color: white; }
+  .btn-unknown { background: var(--white); color: var(--black); border: 2px solid var(--light); }
+
+  .skip-btn {
+    background: none;
+    border: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #bbb;
+    font-size: 0.78rem;
+    cursor: pointer;
+    margin-top: 10px;
+    letter-spacing: 1px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Finished screen */
+  .finished {
+    width: min(440px, 90vw);
+    background: var(--white);
+    border-radius: 20px;
+    padding: 48px 32px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+  }
+  .finished-emoji { font-size: 3rem; margin-bottom: 16px; }
+  .finished-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .finished-sub {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.88rem;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .finished-stats {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+  }
+  .restart-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 14px 36px;
+    background: var(--black);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .restart-btn:active { transform: scale(0.96); }
+
+  .footer {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.7rem;
+    color: #ccc;
+    margin-top: 36px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- rendered by JS -->
+</div>
+
+<script>
+const CARDS = {
+  sostantivi: [
+    // oggetti quotidiani
+    { de: "der Hund", it: "il cane", genus: "der" },
+    { de: "die Katze", it: "la gatta", genus: "die" },
+    { de: "das Buch", it: "il libro", genus: "das" },
+    { de: "der Tisch", it: "il tavolo", genus: "der" },
+    { de: "die Küche", it: "la cucina", genus: "die" },
+    { de: "das Fenster", it: "la finestra", genus: "das" },
+    { de: "der Baum", it: "l'albero", genus: "der" },
+    { de: "die Straße", it: "la strada", genus: "die" },
+    { de: "das Auto", it: "la macchina", genus: "das" },
+    { de: "der Freund", it: "l'amico", genus: "der" },
+    { de: "die Arbeit", it: "il lavoro", genus: "die" },
+    { de: "das Wasser", it: "l'acqua", genus: "das" },
+    { de: "der Morgen", it: "il mattino", genus: "der" },
+    { de: "die Nacht", it: "la notte", genus: "die" },
+    { de: "das Kind", it: "il bambino", genus: "das" },
+    { de: "der Mann", it: "l'uomo", genus: "der" },
+    { de: "die Frau", it: "la donna", genus: "die" },
+    { de: "das Haus", it: "la casa", genus: "das" },
+    { de: "der Zug", it: "il treno", genus: "der" },
+    { de: "die Stadt", it: "la città", genus: "die" },
+    { de: "das Geld", it: "i soldi", genus: "das" },
+    { de: "der Schlüssel", it: "la chiave", genus: "der" },
+    { de: "die Tür", it: "la porta", genus: "die" },
+    { de: "das Handy", it: "il cellulare", genus: "das" },
+    { de: "der Bruder", it: "il fratello", genus: "der" },
+    { de: "die Schwester", it: "la sorella", genus: "die" },
+    { de: "das Wetter", it: "il tempo (meteo)", genus: "das" },
+    { de: "der Kaffee", it: "il caffè", genus: "der" },
+    { de: "die Milch", it: "il latte", genus: "die" },
+    { de: "das Brot", it: "il pane", genus: "das" },
+    { de: "das Kamel", it: "il cammello", genus: "das" },
+    // famiglia
+    { de: "die Mutter", it: "la madre", genus: "die" },
+    { de: "der Vater", it: "il padre", genus: "der" },
+    { de: "die Tochter", it: "la figlia", genus: "die" },
+    { de: "der Sohn", it: "il figlio", genus: "der" },
+    { de: "die Großmutter", it: "la nonna", genus: "die" },
+    { de: "der Großvater", it: "il nonno", genus: "der" },
+    { de: "die Freundin", it: "l'amica / la fidanzata", genus: "die" },
+    { de: "der Ehemann", it: "il marito", genus: "der" },
+    { de: "die Ehefrau", it: "la moglie", genus: "die" },
+    // corpo
+    { de: "der Kopf", it: "la testa", genus: "der" },
+    { de: "der Arm", it: "il braccio", genus: "der" },
+    { de: "das Bein", it: "la gamba", genus: "das" },
+    { de: "die Hand", it: "la mano", genus: "die" },
+    { de: "das Auge", it: "l'occhio", genus: "das" },
+    { de: "die Nase", it: "il naso", genus: "die" },
+    { de: "der Mund", it: "la bocca", genus: "der" },
+    { de: "das Ohr", it: "l'orecchio", genus: "das" },
+    { de: "das Herz", it: "il cuore", genus: "das" },
+    { de: "der Rücken", it: "la schiena", genus: "der" },
+    // cibo e bevande
+    { de: "das Fleisch", it: "la carne", genus: "das" },
+    { de: "der Fisch", it: "il pesce", genus: "der" },
+    { de: "das Gemüse", it: "la verdura", genus: "das" },
+    { de: "das Obst", it: "la frutta", genus: "das" },
+    { de: "der Käse", it: "il formaggio", genus: "der" },
+    { de: "das Ei", it: "l'uovo", genus: "das" },
+    { de: "die Butter", it: "il burro", genus: "die" },
+    { de: "der Wein", it: "il vino", genus: "der" },
+    { de: "das Bier", it: "la birra", genus: "das" },
+    { de: "die Suppe", it: "la zuppa", genus: "die" },
+    { de: "der Zucker", it: "lo zucchero", genus: "der" },
+    { de: "das Salz", it: "il sale", genus: "das" },
+    { de: "der Apfel", it: "la mela", genus: "der" },
+    { de: "die Tomate", it: "il pomodoro", genus: "die" },
+    // posate e cucina
+    { de: "der Teller", it: "il piatto", genus: "der" },
+    { de: "das Glas", it: "il bicchiere", genus: "das" },
+    { de: "die Flasche", it: "la bottiglia", genus: "die" },
+    { de: "die Gabel", it: "la forchetta", genus: "die" },
+    { de: "das Messer", it: "il coltello", genus: "das" },
+    { de: "der Löffel", it: "il cucchiaio", genus: "der" },
+    // casa e mobili
+    { de: "das Bett", it: "il letto", genus: "das" },
+    { de: "der Stuhl", it: "la sedia", genus: "der" },
+    { de: "der Schrank", it: "l'armadio", genus: "der" },
+    { de: "die Lampe", it: "la lampada", genus: "die" },
+    { de: "das Sofa", it: "il divano", genus: "das" },
+    { de: "der Kühlschrank", it: "il frigorifero", genus: "der" },
+    { de: "die Treppe", it: "la scala", genus: "die" },
+    { de: "das Zimmer", it: "la stanza", genus: "das" },
+    // luoghi
+    { de: "die Schule", it: "la scuola", genus: "die" },
+    { de: "das Krankenhaus", it: "l'ospedale", genus: "das" },
+    { de: "der Bahnhof", it: "la stazione", genus: "der" },
+    { de: "der Flughafen", it: "l'aeroporto", genus: "der" },
+    { de: "die Kirche", it: "la chiesa", genus: "die" },
+    { de: "das Hotel", it: "l'hotel", genus: "das" },
+    { de: "der Supermarkt", it: "il supermercato", genus: "der" },
+    { de: "das Restaurant", it: "il ristorante", genus: "das" },
+    { de: "die Apotheke", it: "la farmacia", genus: "die" },
+    { de: "der Arzt", it: "il medico", genus: "der" },
+    // tempo
+    { de: "das Jahr", it: "l'anno", genus: "das" },
+    { de: "der Monat", it: "il mese", genus: "der" },
+    { de: "die Woche", it: "la settimana", genus: "die" },
+    { de: "der Tag", it: "il giorno", genus: "der" },
+    { de: "die Stunde", it: "l'ora", genus: "die" },
+    { de: "die Minute", it: "il minuto", genus: "die" },
+    { de: "der Abend", it: "la sera", genus: "der" },
+    { de: "der Nachmittag", it: "il pomeriggio", genus: "der" },
+    // meteo e natura
+    { de: "der Regen", it: "la pioggia", genus: "der" },
+    { de: "der Schnee", it: "la neve", genus: "der" },
+    { de: "die Sonne", it: "il sole", genus: "die" },
+    { de: "der Wind", it: "il vento", genus: "der" },
+    { de: "die Wolke", it: "la nuvola", genus: "die" },
+    { de: "der Fluss", it: "il fiume", genus: "der" },
+    { de: "der Berg", it: "la montagna", genus: "der" },
+    { de: "das Meer", it: "il mare", genus: "das" },
+    // tecnologia e trasporti
+    { de: "der Computer", it: "il computer", genus: "der" },
+    { de: "das Fahrrad", it: "la bicicletta", genus: "das" },
+    { de: "das Flugzeug", it: "l'aereo", genus: "das" },
+    { de: "das Schiff", it: "la nave", genus: "das" },
+    { de: "der Bus", it: "l'autobus", genus: "der" },
+    { de: "die U-Bahn", it: "la metropolitana", genus: "die" },
+    { de: "die Tasche", it: "la borsa", genus: "die" },
+    { de: "das Hemd", it: "la camicia", genus: "das" },
+    { de: "die Hose", it: "i pantaloni", genus: "die" },
+    { de: "der Schuh", it: "la scarpa", genus: "der" },
+  ],
+  verbi: [
+    { de: "gehen", it: "andare", nota: "sein + gegangen" },
+    { de: "kommen", it: "venire", nota: "sein + gekommen" },
+    { de: "haben", it: "avere", nota: "haben + gehabt" },
+    { de: "sein", it: "essere", nota: "sein + gewesen" },
+    { de: "machen", it: "fare", nota: "haben + gemacht" },
+    { de: "sehen", it: "vedere", nota: "haben + gesehen" },
+    { de: "essen", it: "mangiare", nota: "haben + gegessen" },
+    { de: "trinken", it: "bere", nota: "haben + getrunken" },
+    { de: "schlafen", it: "dormire", nota: "haben + geschlafen" },
+    { de: "arbeiten", it: "lavorare", nota: "haben + gearbeitet" },
+    { de: "sprechen", it: "parlare", nota: "haben + gesprochen" },
+    { de: "lesen", it: "leggere", nota: "haben + gelesen" },
+    { de: "schreiben", it: "scrivere", nota: "haben + geschrieben" },
+    { de: "kaufen", it: "comprare", nota: "haben + gekauft" },
+    { de: "fahren", it: "guidare / andare", nota: "sein + gefahren" },
+    { de: "lernen", it: "imparare", nota: "haben + gelernt" },
+    { de: "helfen", it: "aiutare", nota: "haben + geholfen" },
+    { de: "wohnen", it: "abitare", nota: "haben + gewohnt" },
+    { de: "spielen", it: "giocare", nota: "haben + gespielt" },
+    { de: "fragen", it: "chiedere", nota: "haben + gefragt" },
+    { de: "verstehen", it: "capire", nota: "haben + verstanden" },
+    { de: "brauchen", it: "avere bisogno di", nota: "haben + gebraucht" },
+    { de: "wissen", it: "sapere", nota: "haben + gewusst" },
+    { de: "mögen", it: "piacere / gradire", nota: "haben + gemocht" },
+    { de: "können", it: "potere / sapere fare", nota: "haben + gekonnt" },
+    { de: "denken", it: "pensare", nota: "haben + gedacht" },
+    { de: "finden", it: "trovare", nota: "haben + gefunden" },
+    { de: "nehmen", it: "prendere", nota: "haben + genommen" },
+    { de: "geben", it: "dare", nota: "haben + gegeben" },
+    { de: "bringen", it: "portare", nota: "haben + gebracht" },
+    { de: "stehen", it: "stare in piedi", nota: "haben + gestanden" },
+    { de: "sitzen", it: "essere seduto", nota: "haben + gesessen" },
+    { de: "laufen", it: "correre / camminare", nota: "sein + gelaufen" },
+    { de: "hören", it: "sentire / ascoltare", nota: "haben + gehört" },
+    { de: "kochen", it: "cucinare", nota: "haben + gekocht" },
+    { de: "öffnen", it: "aprire", nota: "haben + geöffnet" },
+    { de: "schließen", it: "chiudere", nota: "haben + geschlossen" },
+    { de: "suchen", it: "cercare", nota: "haben + gesucht" },
+    { de: "glauben", it: "credere", nota: "haben + geglaubt" },
+    { de: "leben", it: "vivere", nota: "haben + gelebt" },
+    { de: "fliegen", it: "volare", nota: "sein + geflogen" },
+    { de: "schwimmen", it: "nuotare", nota: "sein + geschwommen" },
+    { de: "tanzen", it: "ballare", nota: "haben + getanzt" },
+    { de: "singen", it: "cantare", nota: "haben + gesungen" },
+    { de: "schicken", it: "mandare", nota: "haben + geschickt" },
+    { de: "zeigen", it: "mostrare", nota: "haben + gezeigt" },
+    { de: "beginnen", it: "iniziare", nota: "haben + begonnen" },
+    { de: "warten", it: "aspettare", nota: "haben + gewartet" },
+    { de: "rufen", it: "chiamare / gridare", nota: "haben + gerufen" },
+    { de: "müssen", it: "dovere", nota: "haben + gemusst" },
+    { de: "wollen", it: "volere", nota: "haben + gewollt" },
+    { de: "dürfen", it: "essere permesso", nota: "haben + gedurft" },
+    { de: "sollen", it: "dover fare (obbligo)", nota: "haben + gesollt" },
+    { de: "waschen", it: "lavare", nota: "haben + gewaschen" },
+    { de: "kennen", it: "conoscere (qn)", nota: "haben + gekannt" },
+  ],
+  aggettivi: [
+    { de: "groß", it: "grande" },
+    { de: "klein", it: "piccolo" },
+    { de: "schön", it: "bello" },
+    { de: "alt", it: "vecchio / anziano" },
+    { de: "neu", it: "nuovo" },
+    { de: "gut", it: "buono / bene" },
+    { de: "schlecht", it: "cattivo / male" },
+    { de: "schnell", it: "veloce" },
+    { de: "langsam", it: "lento" },
+    { de: "kalt", it: "freddo" },
+    { de: "warm", it: "caldo" },
+    { de: "teuer", it: "caro" },
+    { de: "billig", it: "economico" },
+    { de: "müde", it: "stanco" },
+    { de: "glücklich", it: "felice" },
+    { de: "traurig", it: "triste" },
+    { de: "stark", it: "forte" },
+    { de: "schwach", it: "debole" },
+    { de: "laut", it: "rumoroso" },
+    { de: "leise", it: "silenzioso" },
+    { de: "interessant", it: "interessante" },
+    { de: "langweilig", it: "noioso" },
+    { de: "einfach", it: "semplice / facile" },
+    { de: "schwierig", it: "difficile" },
+    { de: "richtig", it: "giusto / corretto" },
+    { de: "jung", it: "giovane" },
+    { de: "heiß", it: "caldo / bollente" },
+    { de: "sauber", it: "pulito" },
+    { de: "schmutzig", it: "sporco" },
+    { de: "gesund", it: "sano" },
+    { de: "krank", it: "malato" },
+    { de: "hungrig", it: "affamato" },
+    { de: "durstig", it: "assetato" },
+    { de: "süß", it: "dolce" },
+    { de: "bitter", it: "amaro" },
+    { de: "sauer", it: "acido / arrabbiato" },
+    { de: "scharf", it: "piccante / affilato" },
+    { de: "voll", it: "pieno" },
+    { de: "leer", it: "vuoto" },
+    { de: "offen", it: "aperto" },
+    { de: "geschlossen", it: "chiuso" },
+    { de: "reich", it: "ricco" },
+    { de: "arm", it: "povero" },
+    { de: "klug", it: "intelligente" },
+    { de: "dumm", it: "stupido" },
+    { de: "freundlich", it: "gentile / simpatico" },
+    { de: "gefährlich", it: "pericoloso" },
+    { de: "sicher", it: "sicuro" },
+    { de: "wichtig", it: "importante" },
+    { de: "lang", it: "lungo" },
+    { de: "kurz", it: "corto / breve" },
+    { de: "breit", it: "largo" },
+    { de: "eng", it: "stretto" },
+    { de: "hell", it: "chiaro / luminoso" },
+    { de: "dunkel", it: "scuro / buio" },
+    { de: "ruhig", it: "tranquillo" },
+    { de: "lustig", it: "divertente / buffo" },
+    { de: "fertig", it: "pronto / finito" },
+    { de: "falsch", it: "sbagliato / falso" },
+  ],
+  frasi: [
+    { de: "Wie heißt du?", it: "Come ti chiami?" },
+    { de: "Ich heiße...", it: "Mi chiamo..." },
+    { de: "Wie geht es dir?", it: "Come stai?" },
+    { de: "Mir geht es gut.", it: "Sto bene." },
+    { de: "Danke schön!", it: "Grazie mille!" },
+    { de: "Bitte sehr.", it: "Prego." },
+    { de: "Entschuldigung!", it: "Scusa! / Mi scusi!" },
+    { de: "Ich verstehe nicht.", it: "Non capisco." },
+    { de: "Können Sie langsamer sprechen?", it: "Può parlare più lentamente?" },
+    { de: "Wo ist die Toilette?", it: "Dov'è il bagno?" },
+    { de: "Was kostet das?", it: "Quanto costa?" },
+    { de: "Ich möchte...", it: "Vorrei..." },
+    { de: "Guten Morgen!", it: "Buongiorno!" },
+    { de: "Gute Nacht!", it: "Buonanotte!" },
+    { de: "Auf Wiedersehen!", it: "Arrivederci!" },
+    { de: "Ich liebe dich.", it: "Ti voglio bene. / Ti amo." },
+    { de: "Sprechen Sie Deutsch?", it: "Parla tedesco?" },
+    { de: "Ich bin aus Italien.", it: "Sono italiano/a." },
+    { de: "Hilfe!", it: "Aiuto!" },
+    { de: "Prost!", it: "Salute! / Cin cin!" },
+    { de: "Kein Problem.", it: "Nessun problema." },
+    { de: "Ich weiß nicht.", it: "Non lo so." },
+    { de: "Moment bitte!", it: "Un momento, per favore!" },
+    { de: "Guten Appetit!", it: "Buon appetito!" },
+    { de: "Herzlichen Glückwunsch!", it: "Congratulazioni!" },
+    { de: "Wie spät ist es?", it: "Che ore sono?" },
+    { de: "Es ist... Uhr.", it: "Sono le..." },
+    { de: "Wo wohnen Sie?", it: "Dove abita?" },
+    { de: "Ich wohne in...", it: "Abito a..." },
+    { de: "Was machst du beruflich?", it: "Che lavoro fai?" },
+    { de: "Haben Sie einen Tisch frei?", it: "Avete un tavolo libero?" },
+    { de: "Die Rechnung, bitte!", it: "Il conto, per favore!" },
+    { de: "Wo ist der Bahnhof?", it: "Dov'è la stazione?" },
+    { de: "Kann ich mit Karte zahlen?", it: "Posso pagare con carta?" },
+    { de: "Tut mir leid.", it: "Mi dispiace." },
+    { de: "Macht nichts!", it: "Non fa niente!" },
+    { de: "Willkommen!", it: "Benvenuto/a!" },
+    { de: "Viel Spaß!", it: "Divertiti!" },
+    { de: "Viel Glück!", it: "Buona fortuna!" },
+    { de: "Guten Abend!", it: "Buonasera!" },
+    { de: "Ich habe Hunger.", it: "Ho fame." },
+    { de: "Ich habe Durst.", it: "Ho sete." },
+    { de: "Das ist lecker!", it: "È buonissimo!" },
+    { de: "Wie bitte?", it: "Come, scusi? / Prego?" },
+    { de: "Ich bin müde.", it: "Sono stanco/a." },
+    { de: "Ich bin krank.", it: "Sono malato/a." },
+    { de: "Ruf mich an!", it: "Chiamami!" },
+    { de: "Bis morgen!", it: "A domani!" },
+    { de: "Bis bald!", it: "A presto!" },
+    { de: "Ich lerne Deutsch.", it: "Sto imparando il tedesco." },
+    { de: "Das macht Spaß!", it: "È divertente!" },
+    { de: "Ich bin einverstanden.", it: "Sono d'accordo." },
+    { de: "Das stimmt.", it: "È vero. / Esatto." },
+    { de: "Keine Ahnung.", it: "Non ne ho idea." },
+    { de: "Wie heißt das auf Deutsch?", it: "Come si dice in tedesco?" },
+  ],
+};
+
+const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
+const GENUS_LABEL = { der: "maschile", die: "femminile", das: "neutro" };
+const CAT_LABELS = { sostantivi: "📦 Sostantivi", verbi: "⚡ Verbi", aggettivi: "🎨 Aggettivi", frasi: "💬 Frasi" };
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let state = {
+  category: "sostantivi",
+  deck: shuffle(CARDS["sostantivi"]),
+  index: 0,
+  flipped: false,
+  known: new Set(),
+  unknown: new Set(),
+  animating: false,
+  finished: false,
+};
+
+function setCategory(cat) {
+  state.category = cat;
+  state.deck = shuffle(CARDS[cat]);
+  state.index = 0;
+  state.flipped = false;
+  state.known = new Set();
+  state.unknown = new Set();
+  state.finished = false;
+  render();
+}
+
+function flipCard() {
+  if (state.animating || state.finished) return;
+  state.flipped = !state.flipped;
+  render();
+}
+
+function nextCard(dir, markSet) {
+  if (state.animating) return;
+  state.animating = true;
+
+  if (markSet === "known") state.known.add(state.index);
+  else if (markSet === "unknown") state.unknown.add(state.index);
+
+  const inner = document.getElementById("card-inner");
+  if (inner) {
+    inner.classList.add(dir === "right" ? "go-right" : "go-left");
+  }
+
+  setTimeout(() => {
+    const nextIndex = state.index + 1;
+    if (nextIndex >= state.deck.length) {
+      state.finished = true;
+    } else {
+      state.index = nextIndex;
+    }
+    state.flipped = false;
+    state.animating = false;
+    render();
+  }, 280);
+}
+
+function restart() {
+  state.deck = shuffle(CARDS[state.category]);
+  state.index = 0;
+  state.flipped = false;
+  state.known = new Set();
+  state.unknown = new Set();
+  state.finished = false;
+  render();
+}
+
+function render() {
+  const app = document.getElementById("app");
+  const card = state.deck[state.index] || {};
+  const total = state.deck.length;
+  const progress = (state.index / total) * 100;
+  const genusColor = card.genus ? GENUS_COLOR[card.genus] : "#1a1a1a";
+  const isSostantivi = state.category === "sostantivi";
+  const isVerbi = state.category === "verbi";
+
+  const legendHTML = isSostantivi ? `
+    <div class="legend">
+      ${Object.entries(GENUS_COLOR).map(([g, c]) => `
+        <div class="legend-item">
+          <div class="leg-dot" style="background:${c}"></div>
+          <span>${g} = ${GENUS_LABEL[g]}</span>
+        </div>`).join("")}
+    </div>` : "";
+
+  const cardAreaHTML = state.finished ? `
+    <div class="finished">
+      <div class="finished-emoji">🎉</div>
+      <div class="finished-title">Completato!</div>
+      <div class="finished-sub">Hai studiato ${total} ${state.category}</div>
+      <div class="finished-stats">
+        <span style="color:#16a34a">✓ ${state.known.size} conosciute</span>
+        <span style="color:#dc2626">✗ ${state.unknown.size} da ripassare</span>
+      </div>
+      <button class="restart-btn" onclick="restart()">Ricomincia →</button>
+    </div>
+  ` : `
+    <div class="card-wrapper" onclick="flipCard()">
+      <div class="card-inner ${state.flipped ? "flipped" : ""}" id="card-inner">
+        <div class="card-face card-front">
+          ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
+          ${isVerbi ? `<div class="verb-label">VERBO</div>` : ""}
+          <div class="german-word">${card.de || ""}</div>
+          ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
+          <div class="tap-hint">↕ tocca per girare</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="back-label">🇮🇹 in italiano</div>
+          <div class="italian-word">${card.it || ""}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const actionsHTML = state.finished ? "" : `
+    <div class="actions">
+      <button class="action-btn btn-unknown" onclick="nextCard('left','unknown')">✗ Da ripassare</button>
+      <button class="action-btn btn-known" onclick="nextCard('right','known')">✓ La so!</button>
+    </div>
+    <button class="skip-btn" onclick="nextCard('right',null)">salta →</button>
+  `;
+
+  app.innerHTML = `
+    <div class="header">
+      <div class="title">Deutsch Lernen</div>
+      <div class="subtitle">Flashcard per imparare il tedesco</div>
+    </div>
+
+    <div class="categories">
+      ${Object.entries(CAT_LABELS).map(([key, label]) =>
+        `<button class="cat-btn ${state.category === key ? "active" : ""}" onclick="setCategory('${key}')">${label}</button>`
+      ).join("")}
+    </div>
+
+    ${legendHTML}
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span>${state.finished ? total : state.index + 1} / ${total}</span>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-dot" style="background:#16a34a"></div>
+            <span style="color:#16a34a">${state.known.size}</span>
+          </div>
+          <div class="stat">
+            <div class="stat-dot" style="background:#dc2626"></div>
+            <span style="color:#dc2626">${state.unknown.size}</span>
+          </div>
+        </div>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width:${progress}%"></div>
+      </div>
+    </div>
+
+    <div class="card-area">${cardAreaHTML}</div>
+    ${actionsHTML}
+
+    <div class="footer">${total} parole · Tocca la carta per girarla · 100% offline</div>
+  `;
+}
+
+// Keyboard support
+document.addEventListener("keydown", (e) => {
+  if (e.key === " " || e.key === "Enter") { e.preventDefault(); flipCard(); }
+  else if (e.key === "ArrowRight") nextCard("right", "known");
+  else if (e.key === "ArrowLeft") nextCard("left", "unknown");
+  else if (e.key === "ArrowDown") nextCard("right", null);
+});
+
+render();
+</script>
+</body>
+</html>
