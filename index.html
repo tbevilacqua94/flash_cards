@@ -694,9 +694,17 @@ function setCategory(cat) {
   render();
 }
 
+function speakCurrentGerman() {
+  const c = state.deck[state.index];
+  if (c) speak(c.de);
+}
+
 function flipCard() {
   if (state.animating || state.finished) return;
   state.flipped = !state.flipped;
+  const isDeIt = state.direction === "de-it";
+  const germanVisible = isDeIt ? !state.flipped : state.flipped;
+  if (germanVisible) speakCurrentGerman();
   render();
 }
 
@@ -707,13 +715,18 @@ function nextCard(dir, markSet) {
   if (markSet === "known") state.known.add(state.index);
   else if (markSet === "unknown") state.unknown.add(state.index);
 
+  const nextIndex = state.index + 1;
+  const isDeIt = state.direction === "de-it";
+  if (isDeIt && nextIndex < state.deck.length) {
+    speak(state.deck[nextIndex].de);
+  }
+
   const inner = document.getElementById("card-inner");
   if (inner) {
     inner.classList.add(dir === "right" ? "go-right" : "go-left");
   }
 
   setTimeout(() => {
-    const nextIndex = state.index + 1;
     if (nextIndex >= state.deck.length) {
       state.finished = true;
     } else {
@@ -851,11 +864,6 @@ function render() {
 
   `;
 
-  if (!state.finished && !state.animating) {
-    const c = state.deck[state.index];
-    const germanVisible = isDeIt ? !state.flipped : state.flipped;
-    if (germanVisible) speak(c.de);
-  }
 }
 
 // Keyboard support
