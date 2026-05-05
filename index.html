@@ -703,7 +703,7 @@ const CARDS = {
 };
 
 const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
-const GENUS_LABEL = { der: "maschile", die: "femminile", das: "neutro" };
+const GENUS_LABEL = { der: "masc.", die: "fem.", das: "neut." };
 const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2" };
 
 function shuffle(arr) {
@@ -715,14 +715,21 @@ function shuffle(arr) {
   return a;
 }
 
+const POOL_SIZE = 30;
+
+function makedeck(lvl) {
+  return shuffle(CARDS[lvl]).slice(0, Math.min(POOL_SIZE, CARDS[lvl].length));
+}
+
 let state = {
   level: "A1",
-  deck: shuffle(CARDS["A1"]),
+  deck: makedeck("A1"),
+  poolSize: Math.min(POOL_SIZE, CARDS["A1"].length),
   index: 0,
   flipped: false,
   direction: "de-it",
-  known: new Set(),
-  unknown: new Set(),
+  doneCount: 0,
+  totalWrong: 0,
   animating: false,
   finished: false,
 };
@@ -744,11 +751,12 @@ function toggleDirection() {
 
 function setLevel(lvl) {
   state.level = lvl;
-  state.deck = shuffle(CARDS[lvl]);
+  state.deck = makedeck(lvl);
+  state.poolSize = state.deck.length;
   state.index = 0;
   state.flipped = false;
-  state.known = new Set();
-  state.unknown = new Set();
+  state.doneCount = 0;
+  state.totalWrong = 0;
   state.finished = false;
   render();
 }
@@ -767,30 +775,33 @@ function flipCard() {
   render();
 }
 
-function nextCard(dir, markSet) {
+function nextCard(dir, result) {
   if (state.animating) return;
   state.animating = true;
 
-  if (markSet === "known") state.known.add(state.index);
-  else if (markSet === "unknown") state.unknown.add(state.index);
+  if (result === "correct") {
+    state.doneCount++;
+  } else if (result === "wrong") {
+    state.totalWrong++;
+    state.deck.push(state.deck[state.index]);
+  }
+
+  if (state.doneCount >= state.poolSize) {
+    state.finished = true;
+    state.animating = false;
+    render();
+    return;
+  }
 
   const nextIndex = state.index + 1;
   const isDeIt = state.direction === "de-it";
-  if (isDeIt && nextIndex < state.deck.length) {
-    speak(state.deck[nextIndex].de);
-  }
+  if (isDeIt && state.deck[nextIndex]) speak(state.deck[nextIndex].de);
 
   const inner = document.getElementById("card-inner");
-  if (inner) {
-    inner.classList.add(dir === "right" ? "go-right" : "go-left");
-  }
+  if (inner) inner.classList.add(dir === "right" ? "go-right" : "go-left");
 
   setTimeout(() => {
-    if (nextIndex >= state.deck.length) {
-      state.finished = true;
-    } else {
-      state.index = nextIndex;
-    }
+    state.index = nextIndex;
     state.flipped = false;
     state.animating = false;
     render();
@@ -798,11 +809,12 @@ function nextCard(dir, markSet) {
 }
 
 function restart() {
-  state.deck = shuffle(CARDS[state.level]);
+  state.deck = makedeck(state.level);
+  state.poolSize = state.deck.length;
   state.index = 0;
   state.flipped = false;
-  state.known = new Set();
-  state.unknown = new Set();
+  state.doneCount = 0;
+  state.totalWrong = 0;
   state.finished = false;
   render();
 }
@@ -810,8 +822,8 @@ function restart() {
 function render() {
   const app = document.getElementById("app");
   const card = state.deck[state.index] || {};
-  const total = state.deck.length;
-  const progress = (state.index / total) * 100;
+  const total = state.poolSize;
+  const progress = (state.doneCount / total) * 100;
   const genusColor = card.genus ? GENUS_COLOR[card.genus] : "#1a1a1a";
   const isVerbi = !!card.nota;
 
@@ -830,25 +842,25 @@ function render() {
   if (isDeIt) {
     frontContent = `
       ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
-      ${isVerbi ? `<div class="verb-label">VERBO</div>` : ""}
+      ${isVerbi ? `<div class="verb-label">VERB</div>` : ""}
       <div class="german-word">${card.de || ""}</div>
       ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
-      <div class="tap-hint">↕ tocca per girare</div>
+      <div class="tap-hint">↕ tap to flip</div>
     `;
     backContent = `
-      <div class="back-label">🇮🇹 in italiano</div>
+      <div class="back-label">🇮🇹 in Italian</div>
       <div class="italian-word">${card.it || ""}</div>
     `;
   } else {
     frontContent = `
-      <div class="back-label" style="color:#aaa">🇮🇹 italiano</div>
+      <div class="back-label" style="color:#aaa">🇮🇹 Italian</div>
       <div class="german-word">${card.it || ""}</div>
-      <div class="tap-hint">↕ tocca per girare</div>
+      <div class="tap-hint">↕ tap to flip</div>
     `;
     backContent = `
-      <div class="back-label">🇩🇪 in tedesco</div>
+      <div class="back-label">🇩🇪 in German</div>
       ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
-      ${isVerbi ? `<div class="verb-label">VERBO</div>` : ""}
+      ${isVerbi ? `<div class="verb-label">VERB</div>` : ""}
       <div class="italian-word">${card.de || ""}</div>
       ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
     `;
@@ -857,13 +869,13 @@ function render() {
   const cardAreaHTML = state.finished ? `
     <div class="finished">
       <div class="finished-emoji">🎉</div>
-      <div class="finished-title">Completato!</div>
-      <div class="finished-sub">Hai studiato ${total} parole (livello ${state.level})</div>
+      <div class="finished-title">Done!</div>
+      <div class="finished-sub">${total} words · level ${state.level}</div>
       <div class="finished-stats">
-        <span style="color:#16a34a">✓ ${state.known.size} conosciute</span>
-        <span style="color:#dc2626">✗ ${state.unknown.size} da ripassare</span>
+        <span style="color:#16a34a">✓ ${total} correct</span>
+        <span style="color:#dc2626">✗ ${state.totalWrong} wrong</span>
       </div>
-      <button class="restart-btn" onclick="restart()">Ricomincia →</button>
+      <button class="restart-btn" onclick="restart()">Restart →</button>
     </div>
   ` : `
     <div class="card-wrapper" onclick="flipCard()">
@@ -876,10 +888,9 @@ function render() {
 
   const actionsHTML = state.finished ? "" : `
     <div class="actions">
-      <button class="action-btn btn-unknown" onclick="nextCard('left','unknown')">✗ Da ripassare</button>
-      <button class="action-btn btn-known" onclick="nextCard('right','known')">✓ La so!</button>
+      <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Wrong</button>
+      <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Correct</button>
     </div>
-    <button class="skip-btn" onclick="nextCard('right',null)">salta →</button>
   `;
 
   app.innerHTML = `
@@ -900,15 +911,15 @@ function render() {
 
     <div class="progress-wrap">
       <div class="progress-info">
-        <span>${state.finished ? total : state.index + 1} / ${total}</span>
+        <span>${state.doneCount} / ${total}</span>
         <div class="stats">
           <div class="stat">
             <div class="stat-dot" style="background:#16a34a"></div>
-            <span style="color:#16a34a">${state.known.size}</span>
+            <span style="color:#16a34a">${state.doneCount}</span>
           </div>
           <div class="stat">
             <div class="stat-dot" style="background:#dc2626"></div>
-            <span style="color:#dc2626">${state.unknown.size}</span>
+            <span style="color:#dc2626">${state.totalWrong}</span>
           </div>
         </div>
       </div>
