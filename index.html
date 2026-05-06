@@ -1115,7 +1115,7 @@ function setFilter(f) {
 
 function showCategories() {
   state.screen = "categories";
-  state.level = "Categorie";
+  state.level = "Categories";
   state.category = null;
   render();
 }
@@ -1262,7 +1262,7 @@ function render() {
 
   const headerHTML = `
     <div class="header">
-      <div class="title">Deutsch Lernen</div>
+      <div class="title">FlashCards</div>
       <button class="dir-toggle ${isDeIt ? "" : "reversed"}" onclick="toggleDirection()">
         ${isDeIt ? "🇩🇪 → 🇮🇹" : "🇮🇹 → 🇩🇪"}
       </button>
@@ -1273,7 +1273,7 @@ function render() {
       ${Object.keys(LEVEL_LABELS).map(key =>
         `<button class="cat-btn ${state.level === key ? "active" : ""}" onclick="setLevel('${key}')">${LEVEL_LABELS[key]}</button>`
       ).join("")}
-      <button class="cat-btn ${state.screen === 'categories' || state.screen === 'cat-levels' ? 'active' : ''}" onclick="showCategories()">Categorie</button>
+      <button class="cat-btn ${state.screen === 'categories' || state.screen === 'cat-levels' ? 'active' : ''}" onclick="showCategories()">Categories</button>
     </div>`;
 
   // Category grid screen
@@ -1301,7 +1301,7 @@ function render() {
       ${headerHTML}
       ${levelBarHTML}
       <div class="cat-levels">
-        <button class="cat-back" onclick="showCategories()">← Tutte le categorie</button>
+        <button class="cat-back" onclick="showCategories()">← All the categories</button>
         <div class="cat-levels-title">${catInfo.icon} ${catInfo.label}</div>
         <div class="cat-level-grid">
           ${levels.map(lvl => {
@@ -1425,7 +1425,7 @@ function render() {
       <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Errata</button>
       <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Corretta</button>
     </div>
-    ${state.lastAction ? `<button class="cat-back" style="margin-top:6px" onclick="undoLast()">↩ Annulla</button>` : ""}
+    ${state.lastAction ? `<button class="cat-back" style="margin-top:6px" onclick="undoLast()">↩ Undo</button>` : ""}
     <div class="swipe-hint">← swipe per risposta →</div>
   ` : "";
 
