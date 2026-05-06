@@ -80,6 +80,34 @@
     border-color: var(--black);
   }
 
+  /* Type filter */
+  .filters {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 6px 16px 0;
+  }
+  .filter-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 11px;
+    border-radius: 20px;
+    border: 1.5px solid var(--light);
+    cursor: pointer;
+    background: var(--white);
+    color: #777;
+    transition: all 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .filter-btn:active { transform: scale(0.96); }
+  .filter-btn.active {
+    background: #555;
+    color: var(--white);
+    border-color: #555;
+  }
+
   /* Genus legend */
   .legend {
     display: flex;
@@ -131,6 +159,7 @@
     perspective: 1200px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
   .card-inner {
     position: relative;
@@ -188,6 +217,18 @@
     color: #ccc;
     margin-bottom: 8px;
   }
+  .type-chip {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    color: #999;
+    border: 1.5px solid #e0d9cc;
+  }
   .german-word {
     font-size: clamp(1.7rem, 6vw, 2.5rem);
     font-weight: 700;
@@ -227,6 +268,16 @@
     line-height: 1.2;
   }
 
+  /* Swipe hint */
+  .swipe-hint {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.68rem;
+    color: #ccc;
+    text-align: center;
+    margin-top: 4px;
+    letter-spacing: 0.5px;
+  }
+
   /* Actions */
   .actions {
     display: flex;
@@ -250,18 +301,6 @@
   .btn-known { background: var(--known); color: white; }
   .btn-unknown { background: var(--white); color: var(--black); border: 2px solid var(--light); }
 
-  .skip-btn {
-    background: none;
-    border: none;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    color: #bbb;
-    font-size: 0.78rem;
-    cursor: pointer;
-    margin-top: 4px;
-    letter-spacing: 1px;
-    -webkit-tap-highlight-color: transparent;
-  }
-
   .dir-toggle {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.78rem;
@@ -279,6 +318,19 @@
   }
   .dir-toggle:active { transform: scale(0.96); }
   .dir-toggle.reversed { background: var(--black); color: var(--white); border-color: var(--black); }
+
+  /* Empty state */
+  .empty-state {
+    width: min(440px, 90vw);
+    background: var(--white);
+    border-radius: 20px;
+    padding: 40px 32px;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
 
   /* Finished screen */
   .finished {
@@ -341,49 +393,28 @@
 <script>
 const CARDS = {
   A1: [
-    // sostantivi
-    { de: "der Hund", it: "il cane", genus: "der" },
-    { de: "die Katze", it: "la gatta", genus: "die" },
-    { de: "das Buch", it: "il libro", genus: "das" },
-    { de: "der Tisch", it: "il tavolo", genus: "der" },
-    { de: "die Küche", it: "la cucina", genus: "die" },
-    { de: "das Fenster", it: "la finestra", genus: "das" },
-    { de: "der Baum", it: "l'albero", genus: "der" },
-    { de: "die Straße", it: "la strada", genus: "die" },
-    { de: "das Auto", it: "la macchina", genus: "das" },
-    { de: "der Freund", it: "l'amico", genus: "der" },
-    { de: "die Arbeit", it: "il lavoro", genus: "die" },
-    { de: "das Wasser", it: "l'acqua", genus: "das" },
-    { de: "der Morgen", it: "il mattino", genus: "der" },
-    { de: "die Nacht", it: "la notte", genus: "die" },
-    { de: "das Kind", it: "il bambino", genus: "das" },
+    // sostantivi - persone e famiglia
     { de: "der Mann", it: "l'uomo", genus: "der" },
     { de: "die Frau", it: "la donna", genus: "die" },
-    { de: "das Haus", it: "la casa", genus: "das" },
-    { de: "der Zug", it: "il treno", genus: "der" },
-    { de: "die Stadt", it: "la città", genus: "die" },
-    { de: "das Geld", it: "i soldi", genus: "das" },
-    { de: "der Schlüssel", it: "la chiave", genus: "der" },
-    { de: "die Tür", it: "la porta", genus: "die" },
-    { de: "das Handy", it: "il cellulare", genus: "das" },
+    { de: "das Kind", it: "il bambino", genus: "das" },
+    { de: "der Freund", it: "l'amico", genus: "der" },
+    { de: "die Freundin", it: "l'amica / la fidanzata", genus: "die" },
     { de: "der Bruder", it: "il fratello", genus: "der" },
     { de: "die Schwester", it: "la sorella", genus: "die" },
-    { de: "das Wetter", it: "il tempo (meteo)", genus: "das" },
-    { de: "der Kaffee", it: "il caffè", genus: "der" },
-    { de: "die Milch", it: "il latte", genus: "die" },
-    { de: "das Brot", it: "il pane", genus: "das" },
-    { de: "das Kamel", it: "il cammello", genus: "das" },
-    // famiglia
     { de: "die Mutter", it: "la madre", genus: "die" },
     { de: "der Vater", it: "il padre", genus: "der" },
     { de: "die Tochter", it: "la figlia", genus: "die" },
     { de: "der Sohn", it: "il figlio", genus: "der" },
     { de: "die Großmutter", it: "la nonna", genus: "die" },
     { de: "der Großvater", it: "il nonno", genus: "der" },
-    { de: "die Freundin", it: "l'amica / la fidanzata", genus: "die" },
     { de: "der Ehemann", it: "il marito", genus: "der" },
     { de: "die Ehefrau", it: "la moglie", genus: "die" },
-    // corpo
+    { de: "der Onkel", it: "lo zio", genus: "der" },
+    { de: "die Tante", it: "la zia", genus: "die" },
+    { de: "der Lehrer", it: "il professore", genus: "der" },
+    { de: "die Lehrerin", it: "la professoressa", genus: "die" },
+    { de: "der Arzt", it: "il medico", genus: "der" },
+    // sostantivi - corpo
     { de: "der Kopf", it: "la testa", genus: "der" },
     { de: "der Arm", it: "il braccio", genus: "der" },
     { de: "das Bein", it: "la gamba", genus: "das" },
@@ -394,119 +425,234 @@ const CARDS = {
     { de: "das Ohr", it: "l'orecchio", genus: "das" },
     { de: "das Herz", it: "il cuore", genus: "das" },
     { de: "der Rücken", it: "la schiena", genus: "der" },
-    // cibo e bevande
-    { de: "das Fleisch", it: "la carne", genus: "das" },
-    { de: "der Fisch", it: "il pesce", genus: "der" },
-    { de: "das Gemüse", it: "la verdura", genus: "das" },
-    { de: "das Obst", it: "la frutta", genus: "das" },
-    { de: "der Käse", it: "il formaggio", genus: "der" },
-    { de: "das Ei", it: "l'uovo", genus: "das" },
-    { de: "die Butter", it: "il burro", genus: "die" },
-    { de: "der Wein", it: "il vino", genus: "der" },
-    { de: "das Bier", it: "la birra", genus: "das" },
-    { de: "die Suppe", it: "la zuppa", genus: "die" },
-    { de: "der Zucker", it: "lo zucchero", genus: "der" },
-    { de: "das Salz", it: "il sale", genus: "das" },
-    { de: "der Apfel", it: "la mela", genus: "der" },
-    { de: "die Tomate", it: "il pomodoro", genus: "die" },
-    // posate e cucina
-    { de: "der Teller", it: "il piatto", genus: "der" },
-    { de: "das Glas", it: "il bicchiere", genus: "das" },
-    { de: "die Flasche", it: "la bottiglia", genus: "die" },
-    { de: "die Gabel", it: "la forchetta", genus: "die" },
-    { de: "das Messer", it: "il coltello", genus: "das" },
-    { de: "der Löffel", it: "il cucchiaio", genus: "der" },
-    // casa e mobili
+    { de: "der Bauch", it: "la pancia", genus: "der" },
+    { de: "der Finger", it: "il dito", genus: "der" },
+    // sostantivi - casa
+    { de: "das Haus", it: "la casa", genus: "das" },
+    { de: "das Zimmer", it: "la stanza", genus: "das" },
+    { de: "die Küche", it: "la cucina", genus: "die" },
+    { de: "das Fenster", it: "la finestra", genus: "das" },
+    { de: "die Tür", it: "la porta", genus: "die" },
     { de: "das Bett", it: "il letto", genus: "das" },
+    { de: "der Tisch", it: "il tavolo", genus: "der" },
     { de: "der Stuhl", it: "la sedia", genus: "der" },
     { de: "der Schrank", it: "l'armadio", genus: "der" },
     { de: "die Lampe", it: "la lampada", genus: "die" },
     { de: "das Sofa", it: "il divano", genus: "das" },
     { de: "der Kühlschrank", it: "il frigorifero", genus: "der" },
     { de: "die Treppe", it: "la scala", genus: "die" },
-    { de: "das Zimmer", it: "la stanza", genus: "das" },
-    // luoghi
-    { de: "die Schule", it: "la scuola", genus: "die" },
-    { de: "das Krankenhaus", it: "l'ospedale", genus: "das" },
+    // sostantivi - cibo e bevande
+    { de: "das Wasser", it: "l'acqua", genus: "das" },
+    { de: "der Kaffee", it: "il caffè", genus: "der" },
+    { de: "die Milch", it: "il latte", genus: "die" },
+    { de: "das Brot", it: "il pane", genus: "das" },
+    { de: "das Ei", it: "l'uovo", genus: "das" },
+    { de: "die Butter", it: "il burro", genus: "die" },
+    { de: "der Käse", it: "il formaggio", genus: "der" },
+    { de: "der Apfel", it: "la mela", genus: "der" },
+    { de: "die Tomate", it: "il pomodoro", genus: "die" },
+    { de: "der Zucker", it: "lo zucchero", genus: "der" },
+    { de: "das Salz", it: "il sale", genus: "das" },
+    { de: "der Wein", it: "il vino", genus: "der" },
+    { de: "das Bier", it: "la birra", genus: "das" },
+    { de: "der Teller", it: "il piatto", genus: "der" },
+    { de: "das Glas", it: "il bicchiere", genus: "das" },
+    { de: "die Gabel", it: "la forchetta", genus: "die" },
+    { de: "das Messer", it: "il coltello", genus: "das" },
+    { de: "der Löffel", it: "il cucchiaio", genus: "der" },
+    { de: "die Flasche", it: "la bottiglia", genus: "die" },
+    // sostantivi - natura e animali
+    { de: "der Hund", it: "il cane", genus: "der" },
+    { de: "die Katze", it: "la gatta", genus: "die" },
+    { de: "der Baum", it: "l'albero", genus: "der" },
+    { de: "die Blume", it: "il fiore", genus: "die" },
+    { de: "der Garten", it: "il giardino", genus: "der" },
+    { de: "das Tier", it: "l'animale", genus: "das" },
+    { de: "der Vogel", it: "l'uccello", genus: "der" },
+    { de: "das Kamel", it: "il cammello", genus: "das" },
+    { de: "der Fisch", it: "il pesce", genus: "der" },
+    { de: "die Sonne", it: "il sole", genus: "die" },
+    { de: "der Regen", it: "la pioggia", genus: "der" },
+    { de: "der Schnee", it: "la neve", genus: "der" },
+    { de: "der Wind", it: "il vento", genus: "der" },
+    { de: "die Wolke", it: "la nuvola", genus: "die" },
+    { de: "der Berg", it: "la montagna", genus: "der" },
+    { de: "das Meer", it: "il mare", genus: "das" },
+    { de: "der Fluss", it: "il fiume", genus: "der" },
+    // sostantivi - città e trasporti
+    { de: "die Stadt", it: "la città", genus: "die" },
+    { de: "die Straße", it: "la strada", genus: "die" },
+    { de: "der Zug", it: "il treno", genus: "der" },
+    { de: "das Auto", it: "la macchina", genus: "das" },
+    { de: "das Fahrrad", it: "la bicicletta", genus: "das" },
+    { de: "der Bus", it: "l'autobus", genus: "der" },
+    { de: "die U-Bahn", it: "la metropolitana", genus: "die" },
+    { de: "das Flugzeug", it: "l'aereo", genus: "das" },
     { de: "der Bahnhof", it: "la stazione", genus: "der" },
     { de: "der Flughafen", it: "l'aeroporto", genus: "der" },
-    { de: "die Kirche", it: "la chiesa", genus: "die" },
+    { de: "die Schule", it: "la scuola", genus: "die" },
     { de: "das Hotel", it: "l'hotel", genus: "das" },
     { de: "der Supermarkt", it: "il supermercato", genus: "der" },
     { de: "das Restaurant", it: "il ristorante", genus: "das" },
     { de: "die Apotheke", it: "la farmacia", genus: "die" },
-    { de: "der Arzt", it: "il medico", genus: "der" },
-    // tempo
+    { de: "der Park", it: "il parco", genus: "der" },
+    { de: "der Markt", it: "il mercato", genus: "der" },
+    { de: "die Post", it: "la posta", genus: "die" },
+    { de: "die Kirche", it: "la chiesa", genus: "die" },
+    { de: "das Krankenhaus", it: "l'ospedale", genus: "das" },
+    // sostantivi - tempo
     { de: "das Jahr", it: "l'anno", genus: "das" },
     { de: "der Monat", it: "il mese", genus: "der" },
     { de: "die Woche", it: "la settimana", genus: "die" },
     { de: "der Tag", it: "il giorno", genus: "der" },
     { de: "die Stunde", it: "l'ora", genus: "die" },
     { de: "die Minute", it: "il minuto", genus: "die" },
+    { de: "der Morgen", it: "il mattino", genus: "der" },
     { de: "der Abend", it: "la sera", genus: "der" },
+    { de: "die Nacht", it: "la notte", genus: "die" },
     { de: "der Nachmittag", it: "il pomeriggio", genus: "der" },
-    // meteo e natura
-    { de: "der Regen", it: "la pioggia", genus: "der" },
-    { de: "der Schnee", it: "la neve", genus: "der" },
-    { de: "die Sonne", it: "il sole", genus: "die" },
-    { de: "der Wind", it: "il vento", genus: "der" },
-    { de: "die Wolke", it: "la nuvola", genus: "die" },
-    { de: "der Fluss", it: "il fiume", genus: "der" },
-    { de: "der Berg", it: "la montagna", genus: "der" },
-    { de: "das Meer", it: "il mare", genus: "das" },
-    // tecnologia e trasporti
+    // sostantivi - oggetti quotidiani
+    { de: "das Buch", it: "il libro", genus: "das" },
+    { de: "das Handy", it: "il cellulare", genus: "das" },
     { de: "der Computer", it: "il computer", genus: "der" },
-    { de: "das Fahrrad", it: "la bicicletta", genus: "das" },
-    { de: "das Flugzeug", it: "l'aereo", genus: "das" },
-    { de: "das Schiff", it: "la nave", genus: "das" },
-    { de: "der Bus", it: "l'autobus", genus: "der" },
-    { de: "die U-Bahn", it: "la metropolitana", genus: "die" },
+    { de: "der Schlüssel", it: "la chiave", genus: "der" },
+    { de: "das Geld", it: "i soldi", genus: "das" },
     { de: "die Tasche", it: "la borsa", genus: "die" },
     { de: "das Hemd", it: "la camicia", genus: "das" },
     { de: "die Hose", it: "i pantaloni", genus: "die" },
     { de: "der Schuh", it: "la scarpa", genus: "der" },
+    { de: "die Uhr", it: "l'orologio", genus: "die" },
+    { de: "der Stift", it: "la penna", genus: "der" },
+    { de: "das Papier", it: "la carta / il foglio", genus: "das" },
+    { de: "die Sprache", it: "la lingua", genus: "die" },
+    { de: "das Wort", it: "la parola", genus: "das" },
+    { de: "die Arbeit", it: "il lavoro", genus: "die" },
+    { de: "das Wetter", it: "il tempo (meteo)", genus: "das" },
+    // verbi
+    { de: "sein", it: "essere", nota: "sein + gewesen" },
+    { de: "haben", it: "avere", nota: "haben + gehabt" },
+    { de: "gehen", it: "andare", nota: "sein + gegangen" },
+    { de: "kommen", it: "venire", nota: "sein + gekommen" },
+    { de: "machen", it: "fare", nota: "haben + gemacht" },
+    { de: "sagen", it: "dire", nota: "haben + gesagt" },
+    { de: "essen", it: "mangiare", nota: "haben + gegessen" },
+    { de: "trinken", it: "bere", nota: "haben + getrunken" },
+    { de: "schlafen", it: "dormire", nota: "haben + geschlafen" },
+    { de: "wohnen", it: "abitare", nota: "haben + gewohnt" },
+    { de: "heißen", it: "chiamarsi", nota: "haben + geheißen" },
+    { de: "kaufen", it: "comprare", nota: "haben + gekauft" },
+    { de: "suchen", it: "cercare", nota: "haben + gesucht" },
+    { de: "finden", it: "trovare", nota: "haben + gefunden" },
+    { de: "hören", it: "ascoltare", nota: "haben + gehört" },
+    { de: "sehen", it: "vedere", nota: "haben + gesehen" },
+    { de: "lesen", it: "leggere", nota: "haben + gelesen" },
+    { de: "schreiben", it: "scrivere", nota: "haben + geschrieben" },
+    { de: "spielen", it: "giocare", nota: "haben + gespielt" },
+    { de: "lernen", it: "imparare", nota: "haben + gelernt" },
+    { de: "arbeiten", it: "lavorare", nota: "haben + gearbeitet" },
+    { de: "fahren", it: "guidare / andare", nota: "sein + gefahren" },
+    { de: "laufen", it: "correre / camminare", nota: "sein + gelaufen" },
+    { de: "stehen", it: "stare in piedi", nota: "haben + gestanden" },
+    { de: "sitzen", it: "sedersi / essere seduto", nota: "haben + gesessen" },
+    { de: "kochen", it: "cucinare", nota: "haben + gekocht" },
+    { de: "nehmen", it: "prendere", nota: "haben + genommen" },
+    { de: "geben", it: "dare", nota: "haben + gegeben" },
+    { de: "wissen", it: "sapere", nota: "haben + gewusst" },
+    { de: "verstehen", it: "capire", nota: "haben + verstanden" },
+    // aggettivi
+    { de: "groß", it: "grande" },
+    { de: "klein", it: "piccolo" },
+    { de: "neu", it: "nuovo" },
+    { de: "alt", it: "vecchio / anziano" },
+    { de: "schön", it: "bello" },
+    { de: "gut", it: "buono" },
+    { de: "schlecht", it: "cattivo / brutto" },
+    { de: "jung", it: "giovane" },
+    { de: "warm", it: "caldo" },
+    { de: "kalt", it: "freddo" },
+    { de: "offen", it: "aperto" },
+    { de: "geschlossen", it: "chiuso" },
+    { de: "schwarz", it: "nero" },
+    { de: "weiß", it: "bianco" },
+    { de: "rot", it: "rosso" },
+    { de: "blau", it: "blu / azzurro" },
+    { de: "grün", it: "verde" },
+    { de: "gelb", it: "giallo" },
+    { de: "schnell", it: "veloce" },
+    { de: "langsam", it: "lento" },
+    { de: "laut", it: "rumoroso" },
+    { de: "leise", it: "silenzioso" },
+    { de: "müde", it: "stanco" },
+    { de: "krank", it: "malato" },
+    { de: "gesund", it: "sano" },
+    { de: "hungrig", it: "affamato" },
+    { de: "durstig", it: "assetato" },
+    { de: "glücklich", it: "felice" },
+    { de: "traurig", it: "triste" },
+    // frasi
+    { de: "Guten Morgen!", it: "Buongiorno!" },
+    { de: "Guten Abend!", it: "Buonasera!" },
+    { de: "Gute Nacht!", it: "Buonanotte!" },
+    { de: "Wie geht's?", it: "Come stai?" },
+    { de: "Mir geht es gut.", it: "Sto bene." },
+    { de: "Danke!", it: "Grazie!" },
+    { de: "Bitte.", it: "Prego / Per favore." },
+    { de: "Entschuldigung!", it: "Scusi!" },
+    { de: "Wie heißen Sie?", it: "Come si chiama?" },
+    { de: "Ich heiße...", it: "Mi chiamo..." },
+    { de: "Woher kommen Sie?", it: "Da dove viene?" },
+    { de: "Ich komme aus Italien.", it: "Vengo dall'Italia." },
+    { de: "Ich spreche kein Deutsch.", it: "Non parlo tedesco." },
+    { de: "Sprechen Sie Englisch?", it: "Parla inglese?" },
+    { de: "Wo ist die Toilette?", it: "Dov'è il bagno?" },
+    { de: "Was kostet das?", it: "Quanto costa?" },
+    { de: "Ich möchte...", it: "Vorrei..." },
+    { de: "Wie spät ist es?", it: "Che ore sono?" },
+    { de: "Tut mir leid.", it: "Mi dispiace." },
+    { de: "Kein Problem.", it: "Nessun problema." },
   ],
   A2: [
     // sostantivi
-    { de: "der Kopf", it: "la testa", genus: "der" },
-    { de: "der Arm", it: "il braccio", genus: "der" },
-    { de: "das Bein", it: "la gamba", genus: "das" },
-    { de: "die Hand", it: "la mano", genus: "die" },
-    { de: "das Auge", it: "l'occhio", genus: "das" },
-    { de: "die Nase", it: "il naso", genus: "die" },
-    { de: "der Mund", it: "la bocca", genus: "der" },
-    { de: "das Ohr", it: "l'orecchio", genus: "das" },
-    { de: "der Rücken", it: "la schiena", genus: "der" },
-    { de: "der Regen", it: "la pioggia", genus: "der" },
-    { de: "der Schnee", it: "la neve", genus: "der" },
-    { de: "die Sonne", it: "il sole", genus: "die" },
-    { de: "der Wind", it: "il vento", genus: "der" },
-    { de: "die Wolke", it: "la nuvola", genus: "die" },
-    { de: "der Zug", it: "il treno", genus: "der" },
-    { de: "der Bus", it: "l'autobus", genus: "der" },
-    { de: "das Fahrrad", it: "la bicicletta", genus: "das" },
-    { de: "die U-Bahn", it: "la metropolitana", genus: "die" },
-    { de: "das Geld", it: "i soldi", genus: "das" },
-    { de: "der Schlüssel", it: "la chiave", genus: "der" },
-    { de: "das Handy", it: "il cellulare", genus: "das" },
-    { de: "das Bett", it: "il letto", genus: "das" },
-    { de: "der Stuhl", it: "la sedia", genus: "der" },
-    { de: "der Kühlschrank", it: "il frigorifero", genus: "der" },
-    { de: "der Bahnhof", it: "la stazione", genus: "der" },
+    { de: "der Beruf", it: "la professione", genus: "der" },
+    { de: "das Büro", it: "l'ufficio", genus: "das" },
+    { de: "der Kollege", it: "il collega", genus: "der" },
+    { de: "die Kollegin", it: "la collega", genus: "die" },
+    { de: "der Chef", it: "il capo", genus: "der" },
     { de: "die Schule", it: "la scuola", genus: "die" },
-    { de: "das Krankenhaus", it: "l'ospedale", genus: "das" },
-    { de: "der Supermarkt", it: "il supermercato", genus: "der" },
-    { de: "die Apotheke", it: "la farmacia", genus: "die" },
-    { de: "die Woche", it: "la settimana", genus: "die" },
-    { de: "der Monat", it: "il mese", genus: "der" },
-    { de: "das Jahr", it: "l'anno", genus: "das" },
-    { de: "der Käse", it: "il formaggio", genus: "der" },
-    { de: "das Fleisch", it: "la carne", genus: "das" },
-    { de: "der Fisch", it: "il pesce", genus: "der" },
-    { de: "das Gemüse", it: "la verdura", genus: "das" },
-    { de: "der Apfel", it: "la mela", genus: "der" },
-    { de: "der Wein", it: "il vino", genus: "der" },
-    { de: "das Bier", it: "la birra", genus: "das" },
+    { de: "der Unterricht", it: "la lezione", genus: "der" },
+    { de: "die Hausaufgabe", it: "il compito a casa", genus: "die" },
+    { de: "der Urlaub", it: "la vacanza", genus: "der" },
+    { de: "die Reise", it: "il viaggio", genus: "die" },
+    { de: "das Gepäck", it: "i bagagli", genus: "das" },
+    { de: "die Unterkunft", it: "l'alloggio", genus: "die" },
+    { de: "das Zimmer", it: "la stanza", genus: "das" },
+    { de: "der Termin", it: "l'appuntamento", genus: "der" },
+    { de: "das Rezept", it: "la ricetta / la prescrizione", genus: "das" },
+    { de: "die Gesundheit", it: "la salute", genus: "die" },
+    { de: "die Zeitung", it: "il giornale", genus: "die" },
+    { de: "das Bild", it: "l'immagine / il quadro", genus: "das" },
+    { de: "die Musik", it: "la musica", genus: "die" },
+    { de: "der Film", it: "il film", genus: "der" },
+    { de: "das Spiel", it: "il gioco", genus: "das" },
+    { de: "der Sport", it: "lo sport", genus: "der" },
+    { de: "das Hobby", it: "l'hobby", genus: "das" },
+    { de: "der Geburtstag", it: "il compleanno", genus: "der" },
+    { de: "das Geschenk", it: "il regalo", genus: "das" },
+    { de: "die Party", it: "la festa", genus: "die" },
+    { de: "die Einladung", it: "l'invito", genus: "die" },
+    { de: "der Preis", it: "il prezzo / il premio", genus: "der" },
+    { de: "die Rechnung", it: "il conto", genus: "die" },
+    { de: "die Karte", it: "la carta / la cartina", genus: "die" },
+    { de: "die Adresse", it: "l'indirizzo", genus: "die" },
+    { de: "die Telefonnummer", it: "il numero di telefono", genus: "die" },
+    { de: "die E-Mail", it: "l'e-mail", genus: "die" },
+    { de: "das Formular", it: "il modulo", genus: "das" },
+    { de: "der Fehler", it: "l'errore", genus: "der" },
+    { de: "die Antwort", it: "la risposta", genus: "die" },
+    { de: "die Frage", it: "la domanda", genus: "die" },
+    { de: "die Meinung", it: "l'opinione", genus: "die" },
+    { de: "das Problem", it: "il problema", genus: "das" },
+    { de: "die Lösung", it: "la soluzione", genus: "die" },
     // verbi
     { de: "sprechen", it: "parlare", nota: "haben + gesprochen" },
     { de: "lesen", it: "leggere", nota: "haben + gelesen" },
@@ -517,9 +663,11 @@ const CARDS = {
     { de: "arbeiten", it: "lavorare", nota: "haben + gearbeitet" },
     { de: "helfen", it: "aiutare", nota: "haben + geholfen" },
     { de: "können", it: "potere / sapere fare", nota: "haben + gekonnt" },
-    { de: "müssen", it: "dovere", nota: "haben + gemusst" },
+    { de: "müssen", it: "dovere (obbligo)", nota: "haben + gemusst" },
     { de: "wollen", it: "volere", nota: "haben + gewollt" },
     { de: "mögen", it: "piacere / gradire", nota: "haben + gemocht" },
+    { de: "dürfen", it: "potere (permesso)", nota: "haben + gedurft" },
+    { de: "sollen", it: "dovere (per altri)", nota: "haben + gesollt" },
     { de: "kochen", it: "cucinare", nota: "haben + gekocht" },
     { de: "hören", it: "sentire / ascoltare", nota: "haben + gehört" },
     { de: "spielen", it: "giocare", nota: "haben + gespielt" },
@@ -528,6 +676,18 @@ const CARDS = {
     { de: "nehmen", it: "prendere", nota: "haben + genommen" },
     { de: "geben", it: "dare", nota: "haben + gegeben" },
     { de: "laufen", it: "correre / camminare", nota: "sein + gelaufen" },
+    { de: "bestellen", it: "ordinare", nota: "haben + bestellt" },
+    { de: "bezahlen", it: "pagare", nota: "haben + bezahlt" },
+    { de: "warten", it: "aspettare", nota: "haben + gewartet" },
+    { de: "beginnen", it: "iniziare", nota: "haben + begonnen" },
+    { de: "aufhören", it: "smettere / finire", nota: "haben + aufgehört" },
+    { de: "öffnen", it: "aprire", nota: "haben + geöffnet" },
+    { de: "schließen", it: "chiudere", nota: "haben + geschlossen" },
+    { de: "antworten", it: "rispondere", nota: "haben + geantwortet" },
+    { de: "empfehlen", it: "raccomandare", nota: "haben + empfohlen" },
+    { de: "planen", it: "pianificare", nota: "haben + geplant" },
+    { de: "vergessen", it: "dimenticare", nota: "haben + vergessen" },
+    { de: "treffen", it: "incontrare", nota: "haben + getroffen" },
     // aggettivi
     { de: "warm", it: "caldo" },
     { de: "kalt", it: "freddo" },
@@ -544,10 +704,23 @@ const CARDS = {
     { de: "durstig", it: "assetato" },
     { de: "laut", it: "rumoroso" },
     { de: "leise", it: "silenzioso" },
+    { de: "frisch", it: "fresco" },
+    { de: "lecker", it: "delizioso / buono" },
+    { de: "schwer", it: "pesante / difficile" },
+    { de: "leicht", it: "leggero / facile" },
+    { de: "lang", it: "lungo" },
+    { de: "kurz", it: "corto / breve" },
+    { de: "hoch", it: "alto" },
+    { de: "tief", it: "profondo / basso" },
+    { de: "voll", it: "pieno" },
+    { de: "leer", it: "vuoto" },
+    { de: "nett", it: "gentile / carino" },
+    { de: "freundlich", it: "amichevole / cordiale" },
     // frasi
     { de: "Ich verstehe nicht.", it: "Non capisco." },
     { de: "Können Sie langsamer sprechen?", it: "Può parlare più lentamente?" },
-    { de: "Wo ist die Toilette?", it: "Dov'è il bagno?" },
+    { de: "Wie bitte?", it: "Prego? / Come ha detto?" },
+    { de: "Bitte wiederholen Sie!", it: "Prego, ripeta!" },
     { de: "Was kostet das?", it: "Quanto costa?" },
     { de: "Ich möchte...", it: "Vorrei..." },
     { de: "Wie spät ist es?", it: "Che ore sono?" },
@@ -560,6 +733,9 @@ const CARDS = {
     { de: "Tut mir leid.", it: "Mi dispiace." },
     { de: "Kein Problem.", it: "Nessun problema." },
     { de: "Ich weiß nicht.", it: "Non lo so." },
+    { de: "Das stimmt.", it: "È corretto / Giusto." },
+    { de: "Das stimmt nicht.", it: "Non è corretto." },
+    { de: "Ich bin einverstanden.", it: "Sono d'accordo." },
   ],
   B1: [
     // sostantivi
@@ -571,8 +747,6 @@ const CARDS = {
     { de: "die Reise", it: "il viaggio", genus: "die" },
     { de: "der Urlaub", it: "la vacanza", genus: "der" },
     { de: "das Gepäck", it: "i bagagli", genus: "das" },
-    { de: "der Flughafen", it: "l'aeroporto", genus: "der" },
-    { de: "das Flugzeug", it: "l'aereo", genus: "das" },
     { de: "die Unterkunft", it: "l'alloggio", genus: "die" },
     { de: "die Zeitung", it: "il giornale", genus: "die" },
     { de: "die Nachricht", it: "la notizia", genus: "die" },
@@ -588,9 +762,20 @@ const CARDS = {
     { de: "der Unterschied", it: "la differenza", genus: "der" },
     { de: "der Termin", it: "l'appuntamento", genus: "der" },
     { de: "das Rezept", it: "la ricetta / la prescrizione", genus: "das" },
-    { de: "der Arzt", it: "il medico", genus: "der" },
     { de: "die Gesundheit", it: "la salute", genus: "die" },
     { de: "das Gefühl", it: "la sensazione / il sentimento", genus: "das" },
+    { de: "die Pflicht", it: "il dovere / l'obbligo", genus: "die" },
+    { de: "der Grund", it: "il motivo / la ragione", genus: "der" },
+    { de: "die Ursache", it: "la causa", genus: "die" },
+    { de: "die Folge", it: "la conseguenza / il seguito", genus: "die" },
+    { de: "das Ziel", it: "l'obiettivo", genus: "das" },
+    { de: "der Wunsch", it: "il desiderio", genus: "der" },
+    { de: "die Hoffnung", it: "la speranza", genus: "die" },
+    { de: "die Angst", it: "la paura", genus: "die" },
+    { de: "der Stress", it: "lo stress", genus: "der" },
+    { de: "die Ruhe", it: "la calma / la quiete", genus: "die" },
+    { de: "die Gelegenheit", it: "l'opportunità", genus: "die" },
+    { de: "die Erfahrung", it: "l'esperienza", genus: "die" },
     // verbi
     { de: "erklären", it: "spiegare", nota: "haben + erklärt" },
     { de: "beschreiben", it: "descrivere", nota: "haben + beschrieben" },
@@ -603,11 +788,18 @@ const CARDS = {
     { de: "teilnehmen", it: "partecipare", nota: "haben + teilgenommen" },
     { de: "erreichen", it: "raggiungere", nota: "haben + erreicht" },
     { de: "bedeuten", it: "significare", nota: "haben + bedeutet" },
-    { de: "gehören", it: "appartenere", nota: "haben + gehört" },
     { de: "wissen", it: "sapere", nota: "haben + gewusst" },
     { de: "denken", it: "pensare", nota: "haben + gedacht" },
     { de: "finden", it: "trovare", nota: "haben + gefunden" },
     { de: "bringen", it: "portare", nota: "haben + gebracht" },
+    { de: "erlauben", it: "permettere", nota: "haben + erlaubt" },
+    { de: "verbieten", it: "vietare", nota: "haben + verboten" },
+    { de: "sich bewerben", it: "candidarsi", nota: "haben + beworben" },
+    { de: "zustimmen", it: "essere d'accordo", nota: "haben + zugestimmt" },
+    { de: "ablehnen", it: "rifiutare", nota: "haben + abgelehnt" },
+    { de: "vereinbaren", it: "concordare / fissare", nota: "haben + vereinbart" },
+    { de: "sich kümmern um", it: "occuparsi di", nota: "haben + gekümmert" },
+    { de: "sich beschweren", it: "lamentarsi", nota: "haben + beschwert" },
     // aggettivi
     { de: "wichtig", it: "importante" },
     { de: "notwendig", it: "necessario" },
@@ -624,6 +816,13 @@ const CARDS = {
     { de: "langweilig", it: "noioso" },
     { de: "einfach", it: "semplice / facile" },
     { de: "schwierig", it: "difficile" },
+    { de: "selbstständig", it: "autonomo / indipendente" },
+    { de: "verantwortlich", it: "responsabile" },
+    { de: "geduldig", it: "paziente" },
+    { de: "fleißig", it: "diligente / laborioso" },
+    { de: "pünktlich", it: "puntuale" },
+    { de: "höflich", it: "educato / cortese" },
+    { de: "ehrlich", it: "onesto" },
     // frasi
     { de: "Meiner Meinung nach...", it: "Secondo me..." },
     { de: "Das hängt davon ab.", it: "Dipende." },
@@ -635,6 +834,9 @@ const CARDS = {
     { de: "Das ist mir wichtig.", it: "Questo è importante per me." },
     { de: "Sprechen Sie Deutsch?", it: "Parla tedesco?" },
     { de: "Wie lange lernen Sie schon Deutsch?", it: "Da quanto tempo studia tedesco?" },
+    { de: "Ich hätte gerne...", it: "Vorrei avere..." },
+    { de: "Das finde ich gut/schlecht.", it: "Lo trovo buono/brutto." },
+    { de: "Ich bin der Meinung, dass...", it: "Sono dell'opinione che..." },
   ],
   B2: [
     // sostantivi
@@ -662,6 +864,17 @@ const CARDS = {
     { de: "der Einfluss", it: "l'influenza", genus: "der" },
     { de: "die Wahrnehmung", it: "la percezione", genus: "die" },
     { de: "das Verhältnis", it: "il rapporto", genus: "das" },
+    { de: "die Infrastruktur", it: "l'infrastruttura", genus: "die" },
+    { de: "der Mechanismus", it: "il meccanismo", genus: "der" },
+    { de: "das Phänomen", it: "il fenomeno", genus: "das" },
+    { de: "die Perspektive", it: "la prospettiva", genus: "die" },
+    { de: "die Tendenz", it: "la tendenza", genus: "die" },
+    { de: "der Aspekt", it: "l'aspetto", genus: "der" },
+    { de: "die Hypothese", it: "l'ipotesi", genus: "die" },
+    { de: "der Widerspruch", it: "la contraddizione", genus: "der" },
+    { de: "die Transparenz", it: "la trasparenza", genus: "die" },
+    { de: "der Kompromiss", it: "il compromesso", genus: "der" },
+    { de: "die Glaubwürdigkeit", it: "la credibilità", genus: "die" },
     // verbi
     { de: "analysieren", it: "analizzare", nota: "haben + analysiert" },
     { de: "argumentieren", it: "argomentare", nota: "haben + argumentiert" },
@@ -677,6 +890,10 @@ const CARDS = {
     { de: "verzichten auf", it: "rinunciare a", nota: "haben + verzichtet" },
     { de: "entwickeln", it: "sviluppare", nota: "haben + entwickelt" },
     { de: "verbessern", it: "migliorare", nota: "haben + verbessert" },
+    { de: "differenzieren", it: "differenziare", nota: "haben + differenziert" },
+    { de: "überarbeiten", it: "rivedere / revisionare", nota: "haben + überarbeitet" },
+    { de: "implementieren", it: "implementare", nota: "haben + implementiert" },
+    { de: "präzisieren", it: "precisare", nota: "haben + präzisiert" },
     // aggettivi
     { de: "nachhaltig", it: "sostenibile" },
     { de: "umfassend", it: "completo / esaustivo" },
@@ -690,6 +907,13 @@ const CARDS = {
     { de: "ambivalent", it: "ambivalente" },
     { de: "kontrovers", it: "controverso" },
     { de: "signifikant", it: "significativo" },
+    { de: "differenziert", it: "differenziato / sfumato" },
+    { de: "fundiert", it: "fondato / solido" },
+    { de: "plausibel", it: "plausibile" },
+    { de: "konsistent", it: "coerente / consistente" },
+    { de: "relevant", it: "rilevante" },
+    { de: "systematisch", it: "sistematico" },
+    { de: "methodisch", it: "metodico" },
     // frasi
     { de: "Im Großen und Ganzen...", it: "In linea di massima..." },
     { de: "Einerseits... andererseits...", it: "Da un lato... dall'altro..." },
@@ -699,12 +923,22 @@ const CARDS = {
     { de: "Im Hinblick auf...", it: "Per quanto riguarda..." },
     { de: "Unter Berücksichtigung...", it: "Tenendo conto di..." },
     { de: "Das lässt sich damit erklären, dass...", it: "Questo si spiega con il fatto che..." },
+    { de: "Es wäre zu überlegen, ob...", it: "Sarebbe da considerare se..." },
+    { de: "Dem ist entgegenzuhalten, dass...", it: "A ciò si può obiettare che..." },
   ],
 };
 
 const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
 const GENUS_LABEL = { der: "masc.", die: "fem.", das: "neut." };
 const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2" };
+const FILTER_LABELS = { all: "Tutti", noun: "Nomi", verb: "Verbi", adj: "Agg.", phrase: "Frasi" };
+
+function cardType(c) {
+  if (c.genus) return "noun";
+  if (c.nota) return "verb";
+  if (/[\s,!?.'…]/.test(c.de)) return "phrase";
+  return "adj";
+}
 
 function shuffle(arr) {
   const a = [...arr];
@@ -715,16 +949,22 @@ function shuffle(arr) {
   return a;
 }
 
-const POOL_SIZE = 30;
+const POOL_SIZE = 40;
 
-function makedeck(lvl) {
-  return shuffle(CARDS[lvl]).slice(0, Math.min(POOL_SIZE, CARDS[lvl].length));
+function makedeck(lvl, filter) {
+  let cards = CARDS[lvl];
+  if (filter && filter !== "all") {
+    cards = cards.filter(c => cardType(c) === filter);
+  }
+  if (cards.length === 0) return [];
+  return shuffle(cards).slice(0, Math.min(POOL_SIZE, cards.length));
 }
 
 let state = {
   level: "A1",
-  deck: makedeck("A1"),
-  poolSize: Math.min(POOL_SIZE, CARDS["A1"].length),
+  filter: "all",
+  deck: makedeck("A1", "all"),
+  poolSize: 0,
   index: 0,
   flipped: false,
   direction: "de-it",
@@ -733,15 +973,7 @@ let state = {
   animating: false,
   finished: false,
 };
-
-function speak(text) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const utt = new SpeechSynthesisUtterance(text);
-  utt.lang = "de-DE";
-  utt.rate = 0.82;
-  speechSynthesis.speak(utt);
-}
+state.poolSize = state.deck.length;
 
 function toggleDirection() {
   state.direction = state.direction === "de-it" ? "it-de" : "de-it";
@@ -751,7 +983,7 @@ function toggleDirection() {
 
 function setLevel(lvl) {
   state.level = lvl;
-  state.deck = makedeck(lvl);
+  state.deck = makedeck(lvl, state.filter);
   state.poolSize = state.deck.length;
   state.index = 0;
   state.flipped = false;
@@ -761,22 +993,26 @@ function setLevel(lvl) {
   render();
 }
 
-function speakCurrentGerman() {
-  const c = state.deck[state.index];
-  if (c) speak(c.de);
+function setFilter(f) {
+  state.filter = f;
+  state.deck = makedeck(state.level, f);
+  state.poolSize = state.deck.length;
+  state.index = 0;
+  state.flipped = false;
+  state.doneCount = 0;
+  state.totalWrong = 0;
+  state.finished = false;
+  render();
 }
 
 function flipCard() {
-  if (state.animating || state.finished) return;
+  if (state.animating || state.finished || state.deck.length === 0) return;
   state.flipped = !state.flipped;
-  const isDeIt = state.direction === "de-it";
-  const germanVisible = isDeIt ? !state.flipped : state.flipped;
-  if (germanVisible) speakCurrentGerman();
   render();
 }
 
 function nextCard(dir, result) {
-  if (state.animating) return;
+  if (state.animating || state.deck.length === 0) return;
   state.animating = true;
 
   if (result === "correct") {
@@ -793,15 +1029,11 @@ function nextCard(dir, result) {
     return;
   }
 
-  const nextIndex = state.index + 1;
-  const isDeIt = state.direction === "de-it";
-  if (isDeIt && state.deck[nextIndex]) speak(state.deck[nextIndex].de);
-
   const inner = document.getElementById("card-inner");
   if (inner) inner.classList.add(dir === "right" ? "go-right" : "go-left");
 
   setTimeout(() => {
-    state.index = nextIndex;
+    state.index++;
     state.flipped = false;
     state.animating = false;
     render();
@@ -809,7 +1041,7 @@ function nextCard(dir, result) {
 }
 
 function restart() {
-  state.deck = makedeck(state.level);
+  state.deck = makedeck(state.level, state.filter);
   state.poolSize = state.deck.length;
   state.index = 0;
   state.flipped = false;
@@ -823,9 +1055,10 @@ function render() {
   const app = document.getElementById("app");
   const card = state.deck[state.index] || {};
   const total = state.poolSize;
-  const progress = (state.doneCount / total) * 100;
+  const progress = total > 0 ? (state.doneCount / total) * 100 : 0;
   const genusColor = card.genus ? GENUS_COLOR[card.genus] : "#1a1a1a";
-  const isVerbi = !!card.nota;
+  const isVerb = !!card.nota;
+  const isDeIt = state.direction === "de-it";
 
   const legendHTML = `
     <div class="legend">
@@ -836,13 +1069,20 @@ function render() {
         </div>`).join("")}
     </div>`;
 
-  const isDeIt = state.direction === "de-it";
+  const filtersHTML = `
+    <div class="filters">
+      ${Object.entries(FILTER_LABELS).map(([key, label]) => `
+        <button class="filter-btn ${state.filter === key ? "active" : ""}" onclick="setFilter('${key}')">${label}</button>
+      `).join("")}
+    </div>`;
 
   let frontContent, backContent;
-  if (isDeIt) {
+  if (state.deck.length === 0) {
+    // empty state handled below
+  } else if (isDeIt) {
     frontContent = `
       ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
-      ${isVerbi ? `<div class="verb-label">VERB</div>` : ""}
+      ${isVerb ? `<div class="verb-label">VERB</div>` : ""}
       <div class="german-word">${card.de || ""}</div>
       ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
       <div class="tap-hint">↕ tap to flip</div>
@@ -860,38 +1100,46 @@ function render() {
     backContent = `
       <div class="back-label">🇩🇪 in German</div>
       ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
-      ${isVerbi ? `<div class="verb-label">VERB</div>` : ""}
+      ${isVerb ? `<div class="verb-label">VERB</div>` : ""}
       <div class="italian-word">${card.de || ""}</div>
       ${card.nota ? `<div class="verb-nota">${card.nota}</div>` : ""}
     `;
   }
 
-  const cardAreaHTML = state.finished ? `
-    <div class="finished">
-      <div class="finished-emoji">🎉</div>
-      <div class="finished-title">Done!</div>
-      <div class="finished-sub">${total} words · level ${state.level}</div>
-      <div class="finished-stats">
-        <span style="color:#16a34a">✓ ${total} correct</span>
-        <span style="color:#dc2626">✗ ${state.totalWrong} wrong</span>
+  let cardAreaHTML;
+  if (state.deck.length === 0) {
+    cardAreaHTML = `<div class="empty-state">Nessuna carta per questa selezione.</div>`;
+  } else if (state.finished) {
+    cardAreaHTML = `
+      <div class="finished">
+        <div class="finished-emoji">🎉</div>
+        <div class="finished-title">Done!</div>
+        <div class="finished-sub">${total} parole · livello ${state.level}</div>
+        <div class="finished-stats">
+          <span style="color:#16a34a">✓ ${total} corrette</span>
+          <span style="color:#dc2626">✗ ${state.totalWrong} errate</span>
+        </div>
+        <button class="restart-btn" onclick="restart()">Ricomincia →</button>
       </div>
-      <button class="restart-btn" onclick="restart()">Restart →</button>
-    </div>
-  ` : `
-    <div class="card-wrapper" onclick="flipCard()">
-      <div class="card-inner ${state.flipped ? "flipped" : ""}" id="card-inner">
-        <div class="card-face card-front">${frontContent}</div>
-        <div class="card-face card-back">${backContent}</div>
+    `;
+  } else {
+    cardAreaHTML = `
+      <div class="card-wrapper" id="card-wrapper" onclick="flipCard()">
+        <div class="card-inner ${state.flipped ? "flipped" : ""}" id="card-inner">
+          <div class="card-face card-front">${frontContent}</div>
+          <div class="card-face card-back">${backContent}</div>
+        </div>
       </div>
-    </div>
-  `;
+    `;
+  }
 
-  const actionsHTML = state.finished ? "" : `
+  const actionsHTML = (!state.finished && state.deck.length > 0) ? `
     <div class="actions">
-      <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Wrong</button>
-      <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Correct</button>
+      <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Errata</button>
+      <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Corretta</button>
     </div>
-  `;
+    <div class="swipe-hint">← swipe per risposta →</div>
+  ` : "";
 
   app.innerHTML = `
     <div class="header">
@@ -907,6 +1155,7 @@ function render() {
       ).join("")}
     </div>
 
+    ${filtersHTML}
     ${legendHTML}
 
     <div class="progress-wrap">
@@ -930,18 +1179,30 @@ function render() {
 
     <div class="card-area">${cardAreaHTML}</div>
     ${actionsHTML}
-
   `;
-
 }
 
 // Keyboard support
 document.addEventListener("keydown", (e) => {
   if (e.key === " " || e.key === "Enter") { e.preventDefault(); flipCard(); }
-  else if (e.key === "ArrowRight") nextCard("right", "known");
-  else if (e.key === "ArrowLeft") nextCard("left", "unknown");
-  else if (e.key === "ArrowDown") nextCard("right", null);
+  else if (e.key === "ArrowRight") nextCard("right", "correct");
+  else if (e.key === "ArrowLeft") nextCard("left", "wrong");
 });
+
+// Swipe gesture support
+let touchStart = null;
+document.addEventListener("touchstart", e => {
+  touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+document.addEventListener("touchend", e => {
+  if (!touchStart) return;
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dy = e.changedTouches[0].clientY - touchStart.y;
+  touchStart = null;
+  if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+    dx > 0 ? nextCard("right", "correct") : nextCard("left", "wrong");
+  }
+}, { passive: true });
 
 render();
 </script>
