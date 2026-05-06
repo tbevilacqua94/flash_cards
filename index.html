@@ -1066,6 +1066,7 @@ let state = {
   customCards: [],
   customRaw: "",
   customMode: false,
+  lastAction: null,
 };
 state.poolSize = state.deck.length;
 
@@ -1095,6 +1096,7 @@ function setLevel(lvl) {
   state.doneCount = 0;
   state.totalWrong = 0;
   state.finished = false;
+  state.lastAction = null;
   render();
 }
 
@@ -1107,6 +1109,7 @@ function setFilter(f) {
   state.doneCount = 0;
   state.totalWrong = 0;
   state.finished = false;
+  state.lastAction = null;
   render();
 }
 
@@ -1136,6 +1139,7 @@ function startCatLevel(cat, lvl) {
   state.doneCount = 0;
   state.totalWrong = 0;
   state.finished = false;
+  state.lastAction = null;
   render();
 }
 
@@ -1149,12 +1153,20 @@ function nextCard(dir, result) {
   if (state.animating || state.deck.length === 0) return;
   state.animating = true;
 
+  const prevIndex = state.index;
+  const prevDone = state.doneCount;
+  const prevWrong = state.totalWrong;
+  let pushedCard = false;
+
   if (result === "correct") {
     state.doneCount++;
   } else if (result === "wrong") {
     state.totalWrong++;
     state.deck.push(state.deck[state.index]);
+    pushedCard = true;
   }
+
+  state.lastAction = { prevIndex, prevDone, prevWrong, pushedCard, result };
 
   if (state.doneCount >= state.poolSize) {
     state.finished = true;
@@ -1172,6 +1184,20 @@ function nextCard(dir, result) {
     state.animating = false;
     render();
   }, 280);
+}
+
+function undoLast() {
+  if (!state.lastAction) return;
+  const a = state.lastAction;
+  state.lastAction = null;
+  state.finished = false;
+  state.index = a.prevIndex;
+  state.doneCount = a.prevDone;
+  state.totalWrong = a.prevWrong;
+  state.flipped = false;
+  if (a.pushedCard) state.deck.pop();
+  state.animating = false;
+  render();
 }
 
 function restart() {
@@ -1399,6 +1425,7 @@ function render() {
       <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Errata</button>
       <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Corretta</button>
     </div>
+    ${state.lastAction ? `<button class="cat-back" style="margin-top:6px" onclick="undoLast()">↩ Annulla</button>` : ""}
     <div class="swipe-hint">← swipe per risposta →</div>
   ` : "";
 
