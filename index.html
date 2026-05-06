@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Deutsch">
-<title>Deutsch Lernen</title>
+<meta name="apple-mobile-web-app-title" content="FlashCards">
+<title>FlashCards</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -331,6 +331,51 @@
     color: var(--muted);
     font-size: 0.9rem;
   }
+
+  .custom-input-area {
+    width: min(440px, 90vw);
+    background: var(--white);
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    margin-top: 10px;
+  }
+  .custom-input-area textarea {
+    width: 100%;
+    height: 200px;
+    border: 2px solid var(--light);
+    border-radius: 12px;
+    padding: 12px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.88rem;
+    resize: vertical;
+    outline: none;
+    color: var(--black);
+    background: var(--bg);
+  }
+  .custom-input-area textarea:focus { border-color: var(--black); }
+  .custom-hint {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin: 8px 0 12px;
+    line-height: 1.5;
+  }
+  .custom-start-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 12px 32px;
+    background: var(--black);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    width: 100%;
+  }
+  .custom-start-btn:active { transform: scale(0.97); }
+  .custom-start-btn:disabled { background: var(--light); color: var(--muted); cursor: default; }
 
   /* Finished screen */
   .finished {
@@ -930,7 +975,7 @@ const CARDS = {
 
 const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
 const GENUS_LABEL = { der: "masc.", die: "fem.", das: "neut." };
-const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2" };
+const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2", Cust: "Cust" };
 const FILTER_LABELS = { all: "Tutti", noun: "Nomi", verb: "Verbi", adj: "Agg.", phrase: "Frasi" };
 
 function cardType(c) {
@@ -952,11 +997,12 @@ function shuffle(arr) {
 const POOL_SIZE = 40;
 
 function makedeck(lvl, filter) {
-  let cards = CARDS[lvl];
-  if (filter && filter !== "all") {
+  let cards = lvl === "Cust" ? state.customCards : CARDS[lvl];
+  if (!cards || cards.length === 0) return [];
+  if (filter && filter !== "all" && lvl !== "Cust") {
     cards = cards.filter(c => cardType(c) === filter);
   }
-  if (cards.length === 0) return [];
+  if (lvl === "Cust") return shuffle([...cards]);
   return shuffle(cards).slice(0, Math.min(POOL_SIZE, cards.length));
 }
 
@@ -972,6 +1018,9 @@ let state = {
   totalWrong: 0,
   animating: false,
   finished: false,
+  customCards: [],
+  customRaw: "",
+  customMode: false,
 };
 state.poolSize = state.deck.length;
 
@@ -983,8 +1032,16 @@ function toggleDirection() {
 
 function setLevel(lvl) {
   state.level = lvl;
-  state.deck = makedeck(lvl, state.filter);
-  state.poolSize = state.deck.length;
+  if (lvl === "Cust") {
+    state.customMode = true;
+    state.filter = "all";
+    state.deck = [];
+    state.poolSize = 0;
+  } else {
+    state.customMode = false;
+    state.deck = makedeck(lvl, state.filter);
+    state.poolSize = state.deck.length;
+  }
   state.index = 0;
   state.flipped = false;
   state.doneCount = 0;
@@ -1041,7 +1098,49 @@ function nextCard(dir, result) {
 }
 
 function restart() {
-  state.deck = makedeck(state.level, state.filter);
+  if (state.level === "Cust") {
+    state.customMode = true;
+    state.deck = [];
+    state.poolSize = 0;
+  } else {
+    state.deck = makedeck(state.level, state.filter);
+    state.poolSize = state.deck.length;
+  }
+  state.index = 0;
+  state.flipped = false;
+  state.doneCount = 0;
+  state.totalWrong = 0;
+  state.finished = false;
+  render();
+}
+
+function parseCustomCards(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+  const cards = [];
+  for (const line of lines) {
+    const sep = line.includes(' – ') ? ' – ' : ' - ';
+    const idx = line.indexOf(sep);
+    if (idx < 0) continue;
+    let de = line.slice(0, idx).trim();
+    const it = line.slice(idx + sep.length).trim();
+    if (!de || !it) continue;
+    const card = { de, it };
+    const genusMatch = de.match(/^(der|die|das)\s+/i);
+    if (genusMatch) card.genus = genusMatch[1].toLowerCase();
+    cards.push(card);
+  }
+  return cards;
+}
+
+function startCustom() {
+  const ta = document.getElementById('custom-textarea');
+  const text = ta ? ta.value.trim() : '';
+  if (!text) return;
+  state.customRaw = text;
+  state.customCards = parseCustomCards(text);
+  if (state.customCards.length === 0) return;
+  state.customMode = false;
+  state.deck = makedeck("Cust", "all");
   state.poolSize = state.deck.length;
   state.index = 0;
   state.flipped = false;
@@ -1059,6 +1158,39 @@ function render() {
   const genusColor = card.genus ? GENUS_COLOR[card.genus] : "#1a1a1a";
   const isVerb = !!card.nota;
   const isDeIt = state.direction === "de-it";
+  const isCust = state.level === "Cust";
+  const isCustomInput = isCust && state.customMode;
+
+  const headerHTML = `
+    <div class="header">
+      <div class="title">Deutsch Lernen</div>
+      <button class="dir-toggle ${isDeIt ? "" : "reversed"}" onclick="toggleDirection()">
+        ${isDeIt ? "🇩🇪 → 🇮🇹" : "🇮🇹 → 🇩🇪"}
+      </button>
+    </div>`;
+
+  const catsHTML = `
+    <div class="categories">
+      ${Object.keys(LEVEL_LABELS).map(key =>
+        `<button class="cat-btn ${state.level === key ? "active" : ""}" onclick="setLevel('${key}')">${LEVEL_LABELS[key]}</button>`
+      ).join("")}
+    </div>`;
+
+  if (isCustomInput) {
+    app.innerHTML = `
+      ${headerHTML}
+      ${catsHTML}
+      <div class="custom-input-area">
+        <textarea id="custom-textarea" placeholder="der Hund - il cane&#10;die Katze - la gatta&#10;essen - mangiare&#10;groß - grande">${state.customRaw}</textarea>
+        <div class="custom-hint">
+          Una parola per riga: <b>tedesco - italiano</b><br>
+          Anteporre <b>der / die / das</b> per i sostantivi
+        </div>
+        <button class="custom-start-btn" onclick="startCustom()">Inizia →</button>
+      </div>
+    `;
+    return;
+  }
 
   const legendHTML = `
     <div class="legend">
@@ -1075,6 +1207,8 @@ function render() {
         <button class="filter-btn ${state.filter === key ? "active" : ""}" onclick="setFilter('${key}')">${label}</button>
       `).join("")}
     </div>`;
+
+  const editBtn = isCust && !state.finished ? `<div style="text-align:center;margin-top:4px"><button class="filter-btn" onclick="state.customMode=true;render()">✎ Modifica lista</button></div>` : "";
 
   let frontContent, backContent;
   if (state.deck.length === 0) {
@@ -1142,21 +1276,10 @@ function render() {
   ` : "";
 
   app.innerHTML = `
-    <div class="header">
-      <div class="title">Deutsch Lernen</div>
-      <button class="dir-toggle ${isDeIt ? "" : "reversed"}" onclick="toggleDirection()">
-        ${isDeIt ? "🇩🇪 → 🇮🇹" : "🇮🇹 → 🇩🇪"}
-      </button>
-    </div>
-
-    <div class="categories">
-      ${Object.keys(LEVEL_LABELS).map(key =>
-        `<button class="cat-btn ${state.level === key ? "active" : ""}" onclick="setLevel('${key}')">${key}</button>`
-      ).join("")}
-    </div>
-
-    ${filtersHTML}
-    ${legendHTML}
+    ${headerHTML}
+    ${catsHTML}
+    ${!isCust ? filtersHTML + legendHTML : ""}
+    ${editBtn}
 
     <div class="progress-wrap">
       <div class="progress-info">
