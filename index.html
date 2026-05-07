@@ -1300,27 +1300,27 @@ die Finger|le dita|die
 const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
 const GENUS_LABEL = { der: "masc.", die: "fem.", das: "neut." };
 const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2", Cust: "Cust" };
-const FILTER_LABELS = { all: "Tutti", noun: "Nomi", verb: "Verbi", adj: "Agg.", phrase: "Frasi" };
+const FILTER_LABELS = { all: "All", noun: "Nouns", verb: "Verbs", adj: "Adj.", phrase: "Phrases" };
 const CATEGORIES = {
-  famiglia:  { label: "Famiglia",   icon: "👨‍👩‍👧" },
-  corpo:     { label: "Corpo",      icon: "🫀" },
-  casa:      { label: "Casa",       icon: "🏠" },
-  cibo:      { label: "Cibo",       icon: "🍎" },
-  animali:   { label: "Animali",    icon: "🐾" },
-  natura:    { label: "Natura",     icon: "🌿" },
-  citta:     { label: "Città",      icon: "🏙️" },
-  trasporti: { label: "Trasporti",  icon: "🚗" },
-  tempo:     { label: "Tempo",      icon: "⏰" },
-  oggetti:   { label: "Oggetti",    icon: "🎒" },
-  lavoro:    { label: "Lavoro",     icon: "💼" },
+  famiglia:  { label: "Family",     icon: "👨‍👩‍👧" },
+  corpo:     { label: "Body",       icon: "🫀" },
+  casa:      { label: "Home",       icon: "🏠" },
+  cibo:      { label: "Food",       icon: "🍎" },
+  animali:   { label: "Animals",    icon: "🐾" },
+  natura:    { label: "Nature",     icon: "🌿" },
+  citta:     { label: "City",       icon: "🏙️" },
+  trasporti: { label: "Transport",  icon: "🚗" },
+  tempo:     { label: "Time",       icon: "⏰" },
+  oggetti:   { label: "Objects",    icon: "🎒" },
+  lavoro:    { label: "Work",       icon: "💼" },
   sport:     { label: "Sport",      icon: "⚽" },
-  viaggi:    { label: "Viaggi",     icon: "✈️" },
-  società:   { label: "Società",    icon: "🏛️" },
-  verbi:     { label: "Verbi",      icon: "📝" },
-  aggettivi: { label: "Aggettivi",  icon: "✨" },
-  frasi:     { label: "Frasi",      icon: "💬" },
-  salute:    { label: "Salute",     icon: "🏥" },
-  tecnologia:{ label: "Tecnologia", icon: "💻" },
+  viaggi:    { label: "Travel",     icon: "✈️" },
+  società:   { label: "Society",    icon: "🏛️" },
+  verbi:     { label: "Verbs",      icon: "📝" },
+  aggettivi: { label: "Adjectives", icon: "✨" },
+  frasi:     { label: "Phrases",    icon: "💬" },
+  salute:    { label: "Health",     icon: "🏥" },
+  tecnologia:{ label: "Technology", icon: "💻" },
 };
 
 function cardType(c) {
@@ -1677,7 +1677,7 @@ function render() {
       ${Object.keys(LEVEL_LABELS).map(key =>
         `<button class="cat-btn ${state.level === key ? "active" : ""}" onclick="setLevel('${key}')">${LEVEL_LABELS[key]}</button>`
       ).join("")}
-      <button class="cat-btn ${state.screen === 'categories' || state.screen === 'cat-levels' ? 'active' : ''}" onclick="showCategories()">Categories</button>
+      <button class="cat-btn ${state.screen === 'categories' || state.screen === 'cat-levels' ? 'active' : ''}" onclick="showCategories()">Cat.</button>
     </div>`;
 
   // Category grid screen
@@ -1712,7 +1712,7 @@ function render() {
             const cnt = catCount(state.category, lvl);
             if (cnt === 0) return "";
             return `<button class="cat-level-btn" onclick="startCatLevel('${state.category}','${lvl}')">
-              ${lvl}<div class="cat-level-count">${cnt} parole</div>
+              ${lvl}<div class="cat-level-count">${cnt} words</div>
             </button>`;
           }).join("")}
         </div>
@@ -1730,10 +1730,10 @@ function render() {
       <div class="custom-input-area">
         <textarea id="custom-textarea" placeholder="der Hund - il cane&#10;die Katze - la gatta&#10;essen - mangiare&#10;groß - grande">${state.customRaw}</textarea>
         <div class="custom-hint">
-          Una parola per riga: <b>tedesco - italiano</b><br>
-          Anteporre <b>der / die / das</b> per i sostantivi
+          One word per line: <b>German - Italian</b><br>
+          Add <b>der / die / das</b> for nouns
         </div>
-        <button class="custom-start-btn" onclick="startCustom()">Inizia →</button>
+        <button class="custom-start-btn" onclick="startCustom()">Start →</button>
       </div>
     `;
     return;
@@ -1763,7 +1763,7 @@ function render() {
       `).join("")}
     </div>`;
 
-  const editBtn = isCust && !state.finished ? `<div style="text-align:center;margin-top:4px"><button class="filter-btn" onclick="state.customMode=true;render()">✎ Modifica lista</button></div>` : "";
+  const editBtn = isCust && !state.finished ? `<div style="text-align:center;margin-top:4px"><button class="filter-btn" onclick="state.customMode=true;render()">✎ Edit list</button></div>` : "";
 
   const catLabel = isCatGame ? `<div style="text-align:center;margin-top:4px"><span class="filter-btn active" style="cursor:default">${CATEGORIES[state.category].icon} ${CATEGORIES[state.category].label}</span></div>` : "";
 
@@ -1801,19 +1801,19 @@ function render() {
 
   let cardAreaHTML;
   if (state.deck.length === 0) {
-    cardAreaHTML = `<div class="empty-state">Nessuna carta per questa selezione.</div>`;
+    cardAreaHTML = `<div class="empty-state">No cards for this selection.</div>`;
   } else if (state.finished) {
     cardAreaHTML = `
       <div class="finished">
         <div class="finished-emoji">🎉</div>
         <div class="finished-title">Done!</div>
-        <div class="finished-sub">${total} parole · ${state.level}${isCatGame ? " · " + CATEGORIES[state.category].label : ""}</div>
+        <div class="finished-sub">${total} words · ${state.level}${isCatGame ? " · " + CATEGORIES[state.category].label : ""}</div>
         <div class="finished-stats">
-          <span style="color:#16a34a">✓ ${total} corrette</span>
-          <span style="color:#dc2626">✗ ${state.totalWrong} errate</span>
+          <span style="color:#16a34a">✓ ${total} correct</span>
+          <span style="color:#dc2626">✗ ${state.totalWrong} wrong</span>
         </div>
-        <button class="restart-btn" onclick="restart()">Ricomincia →</button>
-        <div><button class="srs-reset" onclick="if(confirm('Reset tutti i progressi SRS?')){localStorage.removeItem('fc_srs');restart();}">Azzera progressi SRS</button></div>
+        <button class="restart-btn" onclick="restart()">Restart →</button>
+        <div><button class="srs-reset" onclick="if(confirm('Reset all SRS progress?')){localStorage.removeItem('fc_srs');restart();}">Reset SRS progress</button></div>
       </div>
     `;
   } else {
@@ -1829,11 +1829,11 @@ function render() {
 
   const actionsHTML = (!state.finished && state.deck.length > 0) ? `
     <div class="actions">
-      <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Errata</button>
-      <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Corretta</button>
+      <button class="action-btn btn-unknown" onclick="nextCard('left','wrong')">✗ Wrong</button>
+      <button class="action-btn btn-known" onclick="nextCard('right','correct')">✓ Correct</button>
     </div>
     ${state.lastAction ? `<button class="cat-back" style="margin-top:6px" onclick="undoLast()">↩ Undo</button>` : ""}
-    <div class="swipe-hint">← swipe per risposta →</div>
+    <div class="swipe-hint">← swipe to answer →</div>
   ` : "";
 
   const showFilters = !isCust && !isCatGame;
@@ -1849,9 +1849,9 @@ function render() {
   const srsStats = srsStatsCards ? srsDeckStats(srsStatsCards) : null;
   const srsSummaryHTML = srsStats ? `
     <div class="srs-summary">
-      ${srsStats.due > 0 ? `<div class="srs-chip" style="color:#ea580c">📅 ${srsStats.due} da ripassare</div>` : ''}
-      ${srsStats.unseen > 0 ? `<div class="srs-chip">✨ ${srsStats.unseen} nuove</div>` : ''}
-      <div class="srs-chip" style="color:#7c3aed">⭐ ${srsStats.mastered} padroneggiate</div>
+      ${srsStats.due > 0 ? `<div class="srs-chip" style="color:#ea580c">📅 ${srsStats.due} to review</div>` : ''}
+      ${srsStats.unseen > 0 ? `<div class="srs-chip">✨ ${srsStats.unseen} new</div>` : ''}
+      <div class="srs-chip" style="color:#7c3aed">⭐ ${srsStats.mastered} mastered</div>
     </div>
   ` : '';
 
