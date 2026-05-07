@@ -397,6 +397,32 @@
     border-radius: 20px; padding: 5px 14px; cursor: pointer; margin-top: 12px;
     -webkit-tap-highlight-color: transparent;
   }
+
+  /* Conjugation table */
+  .tense-badge {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.58rem; font-weight: 800; letter-spacing: 2.5px; text-transform: uppercase;
+    padding: 3px 11px; border-radius: 20px; background: #444; color: #ccc; margin-bottom: 10px;
+  }
+  .conj-table { width: 100%; border-collapse: collapse; }
+  .conj-table td { padding: 3px 0; vertical-align: middle; }
+  .conj-pron {
+    color: rgba(255,255,255,0.38); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.68rem; text-align: right; padding-right: 14px; white-space: nowrap; width: 40%;
+  }
+  .conj-form { color: #f5f0e8; font-family: Georgia, serif; font-size: 1rem; font-weight: 700; }
+  .tense-select-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-top: 14px; width: min(440px,90vw); }
+  .tense-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.92rem; font-weight: 700; padding: 18px 10px;
+    border-radius: 14px; border: none; cursor: pointer;
+    background: var(--white); color: var(--black);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    text-align: center; transition: all 0.18s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .tense-btn:active { transform: scale(0.96); }
+  .tense-count { font-size: 0.7rem; color: #888; font-weight: 500; margin-top: 3px; }
 </style>
 </head>
 <body>
@@ -1297,6 +1323,114 @@ die Finger|le dita|die
   ],
 };
 
+// Compact verb helper: _V(infinitive, italian, ich, du, er, wir, ihr, sie)
+const _V = (de, it, ...forms) => ({ de, it, forms });
+const TENSE_PRONOUNS = ["ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"];
+
+const TENSE_CARDS = {
+  "Präsens": [
+    _V("sein","essere","bin","bist","ist","sind","seid","sind"),
+    _V("haben","avere","habe","hast","hat","haben","habt","haben"),
+    _V("werden","diventare","werde","wirst","wird","werden","werdet","werden"),
+    _V("gehen","andare","gehe","gehst","geht","gehen","geht","gehen"),
+    _V("kommen","venire","komme","kommst","kommt","kommen","kommt","kommen"),
+    _V("machen","fare","mache","machst","macht","machen","macht","machen"),
+    _V("sagen","dire","sage","sagst","sagt","sagen","sagt","sagen"),
+    _V("sprechen","parlare","spreche","sprichst","spricht","sprechen","sprecht","sprechen"),
+    _V("essen","mangiare","esse","isst","isst","essen","esst","essen"),
+    _V("trinken","bere","trinke","trinkst","trinkt","trinken","trinkt","trinken"),
+    _V("fahren","guidare","fahre","fährst","fährt","fahren","fahrt","fahren"),
+    _V("laufen","correre","laufe","läufst","läuft","laufen","lauft","laufen"),
+    _V("sehen","vedere","sehe","siehst","sieht","sehen","seht","sehen"),
+    _V("lesen","leggere","lese","liest","liest","lesen","lest","lesen"),
+    _V("schreiben","scrivere","schreibe","schreibst","schreibt","schreiben","schreibt","schreiben"),
+    _V("nehmen","prendere","nehme","nimmst","nimmt","nehmen","nehmt","nehmen"),
+    _V("geben","dare","gebe","gibst","gibt","geben","gebt","geben"),
+    _V("wissen","sapere","weiß","weißt","weiß","wissen","wisst","wissen"),
+    _V("schlafen","dormire","schlafe","schläfst","schläft","schlafen","schlaft","schlafen"),
+    _V("helfen","aiutare","helfe","hilfst","hilft","helfen","helft","helfen"),
+    _V("können","potere","kann","kannst","kann","können","könnt","können"),
+    _V("müssen","dovere","muss","musst","muss","müssen","müsst","müssen"),
+    _V("wollen","volere","will","willst","will","wollen","wollt","wollen"),
+    _V("dürfen","potere (perm.)","darf","darfst","darf","dürfen","dürft","dürfen"),
+    _V("sollen","dover (obbligo)","soll","sollst","soll","sollen","sollt","sollen"),
+    _V("mögen","piacere","mag","magst","mag","mögen","mögt","mögen"),
+    _V("arbeiten","lavorare","arbeite","arbeitest","arbeitet","arbeiten","arbeitet","arbeiten"),
+    _V("finden","trovare","finde","findest","findet","finden","findet","finden"),
+    _V("denken","pensare","denke","denkst","denkt","denken","denkt","denken"),
+    _V("kaufen","comprare","kaufe","kaufst","kauft","kaufen","kauft","kaufen"),
+  ],
+  "Perfekt": [
+    _V("sein","essere","bin gewesen","bist gewesen","ist gewesen","sind gewesen","seid gewesen","sind gewesen"),
+    _V("haben","avere","habe gehabt","hast gehabt","hat gehabt","haben gehabt","habt gehabt","haben gehabt"),
+    _V("werden","diventare","bin geworden","bist geworden","ist geworden","sind geworden","seid geworden","sind geworden"),
+    _V("gehen","andare","bin gegangen","bist gegangen","ist gegangen","sind gegangen","seid gegangen","sind gegangen"),
+    _V("kommen","venire","bin gekommen","bist gekommen","ist gekommen","sind gekommen","seid gekommen","sind gekommen"),
+    _V("fahren","guidare","bin gefahren","bist gefahren","ist gefahren","sind gefahren","seid gefahren","sind gefahren"),
+    _V("laufen","correre","bin gelaufen","bist gelaufen","ist gelaufen","sind gelaufen","seid gelaufen","sind gelaufen"),
+    _V("machen","fare","habe gemacht","hast gemacht","hat gemacht","haben gemacht","habt gemacht","haben gemacht"),
+    _V("kaufen","comprare","habe gekauft","hast gekauft","hat gekauft","haben gekauft","habt gekauft","haben gekauft"),
+    _V("sprechen","parlare","habe gesprochen","hast gesprochen","hat gesprochen","haben gesprochen","habt gesprochen","haben gesprochen"),
+    _V("essen","mangiare","habe gegessen","hast gegessen","hat gegessen","haben gegessen","habt gegessen","haben gegessen"),
+    _V("trinken","bere","habe getrunken","hast getrunken","hat getrunken","haben getrunken","habt getrunken","haben getrunken"),
+    _V("sehen","vedere","habe gesehen","hast gesehen","hat gesehen","haben gesehen","habt gesehen","haben gesehen"),
+    _V("lesen","leggere","habe gelesen","hast gelesen","hat gelesen","haben gelesen","habt gelesen","haben gelesen"),
+    _V("schreiben","scrivere","habe geschrieben","hast geschrieben","hat geschrieben","haben geschrieben","habt geschrieben","haben geschrieben"),
+    _V("nehmen","prendere","habe genommen","hast genommen","hat genommen","haben genommen","habt genommen","haben genommen"),
+    _V("geben","dare","habe gegeben","hast gegeben","hat gegeben","haben gegeben","habt gegeben","haben gegeben"),
+    _V("schlafen","dormire","habe geschlafen","hast geschlafen","hat geschlafen","haben geschlafen","habt geschlafen","haben geschlafen"),
+    _V("arbeiten","lavorare","habe gearbeitet","hast gearbeitet","hat gearbeitet","haben gearbeitet","habt gearbeitet","haben gearbeitet"),
+    _V("lernen","imparare","habe gelernt","hast gelernt","hat gelernt","haben gelernt","habt gelernt","haben gelernt"),
+    _V("wohnen","abitare","habe gewohnt","hast gewohnt","hat gewohnt","haben gewohnt","habt gewohnt","haben gewohnt"),
+    _V("helfen","aiutare","habe geholfen","hast geholfen","hat geholfen","haben geholfen","habt geholfen","haben geholfen"),
+    _V("finden","trovare","habe gefunden","hast gefunden","hat gefunden","haben gefunden","habt gefunden","haben gefunden"),
+    _V("denken","pensare","habe gedacht","hast gedacht","hat gedacht","haben gedacht","habt gedacht","haben gedacht"),
+  ],
+  "Präteritum": [
+    _V("sein","essere","war","warst","war","waren","wart","waren"),
+    _V("haben","avere","hatte","hattest","hatte","hatten","hattet","hatten"),
+    _V("werden","diventare","wurde","wurdest","wurde","wurden","wurdet","wurden"),
+    _V("können","potere","konnte","konntest","konnte","konnten","konntet","konnten"),
+    _V("müssen","dovere","musste","musstest","musste","mussten","musstet","mussten"),
+    _V("wollen","volere","wollte","wolltest","wollte","wollten","wolltet","wollten"),
+    _V("dürfen","potere (perm.)","durfte","durftest","durfte","durften","durftet","durften"),
+    _V("sollen","dover (obbligo)","sollte","solltest","sollte","sollten","solltet","sollten"),
+    _V("mögen","piacere","mochte","mochtest","mochte","mochten","mochtet","mochten"),
+    _V("gehen","andare","ging","gingst","ging","gingen","gingt","gingen"),
+    _V("kommen","venire","kam","kamst","kam","kamen","kamt","kamen"),
+    _V("sehen","vedere","sah","sahst","sah","sahen","saht","sahen"),
+    _V("geben","dare","gab","gabst","gab","gaben","gabt","gaben"),
+    _V("nehmen","prendere","nahm","nahmst","nahm","nahmen","nahmt","nahmen"),
+    _V("fahren","guidare","fuhr","fuhrst","fuhr","fuhren","fuhrt","fuhren"),
+    _V("laufen","correre","lief","liefst","lief","liefen","lieft","liefen"),
+    _V("sprechen","parlare","sprach","sprachst","sprach","sprachen","spracht","sprachen"),
+    _V("schreiben","scrivere","schrieb","schriebst","schrieb","schrieben","schriebt","schrieben"),
+    _V("finden","trovare","fand","fandst","fand","fanden","fandet","fanden"),
+    _V("wissen","sapere","wusste","wusstest","wusste","wussten","wusstet","wussten"),
+    _V("stehen","stare in piedi","stand","standst","stand","standen","standet","standen"),
+    _V("essen","mangiare","aß","aßest","aß","aßen","aßt","aßen"),
+    _V("trinken","bere","trank","trankst","trank","tranken","trankt","tranken"),
+  ],
+  "Konjunktiv II": [
+    _V("sein","essere","wäre","wärst","wäre","wären","wärt","wären"),
+    _V("haben","avere","hätte","hättest","hätte","hätten","hättet","hätten"),
+    _V("werden","diventare","würde","würdest","würde","würden","würdet","würden"),
+    _V("können","potere","könnte","könntest","könnte","könnten","könntet","könnten"),
+    _V("müssen","dovere","müsste","müsstest","müsste","müssten","müsstet","müssten"),
+    _V("dürfen","potere (perm.)","dürfte","dürftest","dürfte","dürften","dürftet","dürften"),
+    _V("sollen","dover (obbligo)","sollte","solltest","sollte","sollten","solltet","sollten"),
+    _V("wollen","volere","wollte","wolltest","wollte","wollten","wolltet","wollten"),
+    _V("mögen","piacere","möchte","möchtest","möchte","möchten","möchtet","möchten"),
+    _V("wissen","sapere","wüsste","wüsstest","wüsste","wüssten","wüsstet","wüssten"),
+    _V("gehen","andare","ginge","gingest","ginge","gingen","ginget","gingen"),
+    _V("kommen","venire","käme","kämest","käme","kämen","kämet","kämen"),
+    _V("geben","dare","gäbe","gäbest","gäbe","gäben","gäbet","gäben"),
+    _V("nehmen","prendere","nähme","nähmest","nähme","nähmen","nähmet","nähmen"),
+    _V("fahren","guidare","führe","führest","führe","führen","führet","führen"),
+    _V("sehen","vedere","sähe","sähest","sähe","sähen","sähet","sähen"),
+  ],
+};
+
 const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
 const GENUS_LABEL = { der: "masc.", die: "fem.", das: "neut." };
 const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2", Cust: "Cust" };
@@ -1375,20 +1509,21 @@ function srsUpdate(de, correct) {
   srsSave(data);
 }
 function todayStr() { return new Date().toISOString().split("T")[0]; }
+function cardSRSKey(card) { return card._key || card.de; }
 function srsDeckStats(cards) {
   const data = srsLoad();
   const today = todayStr();
   let due = 0, unseen = 0, mastered = 0;
   for (const c of cards) {
-    const e = data[c.de];
+    const e = data[cardSRSKey(c)];
     if (!e) { unseen++; continue; }
     if (e.level >= 5 && e.nextReview && e.nextReview > today) { mastered++; continue; }
     if (!e.nextReview || e.nextReview <= today) due++;
   }
   return { due, unseen, mastered };
 }
-function srsBadgeHTML(de) {
-  const e = srsGet(de);
+function srsBadgeHTML(card) {
+  const e = srsGet(cardSRSKey(card));
   const lv = e.level;
   const col = SRS_COLORS[lv];
   const dots = Array.from({length: 5}, (_, i) =>
@@ -1436,6 +1571,36 @@ function makedeck(lvl, filter, cat) {
   return result.slice(0, POOL_SIZE);
 }
 
+function makeTenseDeck(tense) {
+  const raw = TENSE_CARDS[tense] || [];
+  const cards = raw.map(c => ({ ...c, _key: `__tense__${tense}||${c.de}` }));
+  if (cards.length === 0) return [];
+  const data = srsLoad();
+  const today = todayStr();
+  const due = [], unseen = [], notDue = [];
+  for (const card of cards) {
+    const e = data[card._key];
+    if (!e) { unseen.push(card); continue; }
+    if (!e.nextReview || e.nextReview <= today) due.push({ card, e });
+    else notDue.push({ card, e });
+  }
+  due.sort((a, b) => {
+    if (a.e.level !== b.e.level) return a.e.level - b.e.level;
+    if (!a.e.nextReview && !b.e.nextReview) return 0;
+    if (!a.e.nextReview) return -1;
+    if (!b.e.nextReview) return 1;
+    return a.e.nextReview.localeCompare(b.e.nextReview);
+  });
+  const result = due.map(x => x.card);
+  if (result.length < POOL_SIZE)
+    result.push(...shuffle(unseen).slice(0, POOL_SIZE - result.length));
+  if (result.length < POOL_SIZE) {
+    notDue.sort((a, b) => a.e.level - b.e.level);
+    result.push(...notDue.map(x => x.card).slice(0, POOL_SIZE - result.length));
+  }
+  return result.slice(0, POOL_SIZE);
+}
+
 function catCount(cat, lvl) {
   const cards = CARDS[lvl];
   return cards ? cards.filter(c => c.cat === cat).length : 0;
@@ -1459,6 +1624,8 @@ let state = {
   customRaw: "",
   customMode: false,
   lastAction: null,
+  tenseMode: false,
+  tense: null,
 };
 state.poolSize = state.deck.length;
 
@@ -1468,8 +1635,37 @@ function toggleDirection() {
   render();
 }
 
+function showTenses() {
+  state.screen = "tense-select";
+  state.level = "Tenses";
+  state.tenseMode = true;
+  state.tense = null;
+  state.category = null;
+  render();
+}
+
+function startTense(tense) {
+  state.screen = "game";
+  state.level = "Tenses";
+  state.tenseMode = true;
+  state.tense = tense;
+  state.category = null;
+  state.customMode = false;
+  state.deck = makeTenseDeck(tense);
+  state.poolSize = state.deck.length;
+  state.index = 0;
+  state.flipped = false;
+  state.doneCount = 0;
+  state.totalWrong = 0;
+  state.finished = false;
+  state.lastAction = null;
+  render();
+}
+
 function setLevel(lvl) {
   state.level = lvl;
+  state.tenseMode = false;
+  state.tense = null;
   state.screen = "game";
   if (lvl === "Cust") {
     state.customMode = true;
@@ -1509,6 +1705,8 @@ function showCategories() {
   state.screen = "categories";
   state.level = "Categories";
   state.category = null;
+  state.tenseMode = false;
+  state.tense = null;
   render();
 }
 
@@ -1551,16 +1749,17 @@ function nextCard(dir, result) {
   let pushedCard = false;
 
   const currentCard = state.deck[state.index];
+  const _srsKey = currentCard ? cardSRSKey(currentCard) : null;
   const prevSRS = (currentCard && state.level !== "Cust")
-    ? { de: currentCard.de, entry: { ...srsGet(currentCard.de) } }
+    ? { key: _srsKey, entry: { ...srsGet(_srsKey) } }
     : null;
 
   if (result === "correct") {
     state.doneCount++;
-    if (currentCard && state.level !== "Cust") srsUpdate(currentCard.de, true);
+    if (currentCard && state.level !== "Cust") srsUpdate(_srsKey, true);
   } else if (result === "wrong") {
     state.totalWrong++;
-    if (currentCard && state.level !== "Cust") srsUpdate(currentCard.de, false);
+    if (currentCard && state.level !== "Cust") srsUpdate(_srsKey, false);
     state.deck.push(state.deck[state.index]);
     pushedCard = true;
   }
@@ -1597,7 +1796,7 @@ function undoLast() {
   if (a.pushedCard) state.deck.pop();
   if (a.prevSRS) {
     const data = srsLoad();
-    data[a.prevSRS.de] = a.prevSRS.entry;
+    data[a.prevSRS.key] = a.prevSRS.entry;
     srsSave(data);
   }
   state.animating = false;
@@ -1605,7 +1804,10 @@ function undoLast() {
 }
 
 function restart() {
-  if (state.level === "Cust") {
+  if (state.tenseMode && state.tense) {
+    state.deck = makeTenseDeck(state.tense);
+    state.poolSize = state.deck.length;
+  } else if (state.level === "Cust") {
     state.customMode = true;
     state.deck = [];
     state.poolSize = 0;
@@ -1677,8 +1879,29 @@ function render() {
       ${Object.keys(LEVEL_LABELS).map(key =>
         `<button class="cat-btn ${state.level === key ? "active" : ""}" onclick="setLevel('${key}')">${LEVEL_LABELS[key]}</button>`
       ).join("")}
+      <button class="cat-btn ${state.tenseMode ? 'active' : ''}" onclick="showTenses()">Tenses</button>
       <button class="cat-btn ${state.screen === 'categories' || state.screen === 'cat-levels' ? 'active' : ''}" onclick="showCategories()">Cat.</button>
     </div>`;
+
+  // Tense selection screen
+  if (state.screen === "tense-select") {
+    const tenseButtons = Object.keys(TENSE_CARDS).map(function(tense) {
+      const cnt = TENSE_CARDS[tense].length;
+      const keyed = TENSE_CARDS[tense].map(function(c) { return Object.assign({}, c, { _key: "__tense__" + tense + "||" + c.de }); });
+      const ts = srsDeckStats(keyed);
+      const dueLabel = ts.due > 0 ? '<span style="color:#ea580c"> · 📅' + ts.due + "</span>" : "";
+      return '<button class="tense-btn" onclick="startTense(\'' + tense + '\')">' +
+        tense + dueLabel +
+        '<div class="tense-count">' + cnt + " verbs · ⭐" + ts.mastered + "</div></button>";
+    }).join("");
+    app.innerHTML = `
+      ${headerHTML}
+      ${levelBarHTML}
+      <div style="text-align:center;margin-top:14px;font-family:-apple-system,sans-serif;font-size:1.1rem;font-weight:700">🔀 Verb Tenses</div>
+      <div class="tense-select-grid">${tenseButtons}</div>
+    `;
+    return;
+  }
 
   // Category grid screen
   if (state.screen === "categories") {
@@ -1770,9 +1993,22 @@ function render() {
   let frontContent, backContent;
   if (state.deck.length === 0) {
     // handled below
+  } else if (card.forms) {
+    // Conjugation card
+    const conjRows = TENSE_PRONOUNS.map((p, i) =>
+      `<tr><td class="conj-pron">${p}</td><td class="conj-form">${card.forms[i] || ""}</td></tr>`
+    ).join("");
+    frontContent = `
+      ${srsBadgeHTML(card)}
+      <div class="tense-badge">${card.tense || state.tense || ""}</div>
+      <div class="german-word">${card.de || ""}</div>
+      <div class="verb-nota" style="color:#aaa;margin-top:6px">${card.it || ""}</div>
+      <div class="tap-hint">↕ tap to flip</div>
+    `;
+    backContent = `<table class="conj-table">${conjRows}</table>`;
   } else if (isDeIt) {
     frontContent = `
-      ${srsBadgeHTML(card.de)}
+      ${srsBadgeHTML(card)}
       ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
       ${isVerb ? `<div class="verb-label">VERB</div>` : ""}
       <div class="german-word">${card.de || ""}</div>
@@ -1785,7 +2021,7 @@ function render() {
     `;
   } else {
     frontContent = `
-      ${srsBadgeHTML(card.de)}
+      ${srsBadgeHTML(card)}
       <div class="back-label" style="color:#aaa">🇮🇹 Italian</div>
       <div class="german-word">${card.it || ""}</div>
       <div class="tap-hint">↕ tap to flip</div>
@@ -1807,7 +2043,7 @@ function render() {
       <div class="finished">
         <div class="finished-emoji">🎉</div>
         <div class="finished-title">Done!</div>
-        <div class="finished-sub">${total} words · ${state.level}${isCatGame ? " · " + CATEGORIES[state.category].label : ""}</div>
+        <div class="finished-sub">${total} words · ${state.tenseMode && state.tense ? state.tense : state.level}${isCatGame ? " · " + CATEGORIES[state.category].label : ""}</div>
         <div class="finished-stats">
           <span style="color:#16a34a">✓ ${total} correct</span>
           <span style="color:#dc2626">✗ ${state.totalWrong} wrong</span>
@@ -1836,10 +2072,18 @@ function render() {
     <div class="swipe-hint">← swipe to answer →</div>
   ` : "";
 
-  const showFilters = !isCust && !isCatGame;
+  const showFilters = !isCust && !isCatGame && !state.tenseMode;
+
+  const tenseLabel = state.tenseMode && state.tense
+    ? `<div style="text-align:center;margin-top:4px"><span class="filter-btn active" style="cursor:default">🔀 ${state.tense}</span></div>`
+    : "";
 
   let srsStatsCards = null;
-  if (!isCust && CARDS[state.level]) {
+  if (state.tenseMode && state.tense && TENSE_CARDS[state.tense]) {
+    srsStatsCards = TENSE_CARDS[state.tense].map(function(c) {
+      return Object.assign({}, c, { _key: "__tense__" + state.tense + "||" + c.de });
+    });
+  } else if (!isCust && CARDS[state.level]) {
     srsStatsCards = CARDS[state.level];
     if (state.category && state.category !== "all")
       srsStatsCards = srsStatsCards.filter(c => c.cat === state.category);
@@ -1861,6 +2105,7 @@ function render() {
     ${srsSummaryHTML}
     ${showFilters ? filtersHTML + legendHTML : ""}
     ${catLabel}
+    ${tenseLabel}
     ${editBtn}
 
     <div class="progress-wrap">
