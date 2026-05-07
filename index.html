@@ -423,6 +423,22 @@
   }
   .tense-btn:active { transform: scale(0.96); }
   .tense-count { font-size: 0.7rem; color: #888; font-weight: 500; margin-top: 3px; }
+  .guide-btn {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.82rem; font-weight: 700; padding: 10px 22px;
+    border-radius: 14px; border: 1.5px solid var(--light);
+    background: var(--white); color: #555; cursor: pointer;
+    margin-top: 10px; -webkit-tap-highlight-color: transparent;
+  }
+  .guide-screen { width: min(440px,90vw); margin-top: 14px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 32px; }
+  .guide-card { background: var(--white); border-radius: 16px; padding: 18px 20px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  .guide-tense-title { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 1rem; font-weight: 800; margin-bottom: 2px; }
+  .guide-tense-when { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.72rem; color: #777; margin-bottom: 10px; }
+  .guide-rule { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.78rem; color: #444; line-height: 1.5; margin-bottom: 8px; }
+  .guide-ex { background: #f9f7f3; border-radius: 8px; padding: 7px 11px; margin: 4px 0; }
+  .guide-ex-de { font-family: Georgia, serif; font-size: 0.88rem; color: #1a1a1a; font-weight: 600; }
+  .guide-ex-it { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.7rem; color: #999; margin-top: 1px; }
+  .guide-key { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 0.72rem; font-weight: 700; margin-top: 10px; padding: 5px 10px; border-radius: 8px; display: inline-block; color: white; }
 </style>
 </head>
 <body>
@@ -1323,114 +1339,76 @@ die Finger|le dita|die
   ],
 };
 
-// Compact verb helper: _V(infinitive, italian, ich, du, er, wir, ihr, sie)
-const _V = (de, it, ...forms) => ({ de, it, forms });
 const TENSE_PRONOUNS = ["ich", "du", "er/sie/es", "wir", "ihr", "sie/Sie"];
+const TENSES = ["Präsens", "Perfekt", "Präteritum", "Konjunktiv II"];
 
-const TENSE_CARDS = {
-  "Präsens": [
-    _V("sein","essere","bin","bist","ist","sind","seid","sind"),
-    _V("haben","avere","habe","hast","hat","haben","habt","haben"),
-    _V("werden","diventare","werde","wirst","wird","werden","werdet","werden"),
-    _V("gehen","andare","gehe","gehst","geht","gehen","geht","gehen"),
-    _V("kommen","venire","komme","kommst","kommt","kommen","kommt","kommen"),
-    _V("machen","fare","mache","machst","macht","machen","macht","machen"),
-    _V("sagen","dire","sage","sagst","sagt","sagen","sagt","sagen"),
-    _V("sprechen","parlare","spreche","sprichst","spricht","sprechen","sprecht","sprechen"),
-    _V("essen","mangiare","esse","isst","isst","essen","esst","essen"),
-    _V("trinken","bere","trinke","trinkst","trinkt","trinken","trinkt","trinken"),
-    _V("fahren","guidare","fahre","fährst","fährt","fahren","fahrt","fahren"),
-    _V("laufen","correre","laufe","läufst","läuft","laufen","lauft","laufen"),
-    _V("sehen","vedere","sehe","siehst","sieht","sehen","seht","sehen"),
-    _V("lesen","leggere","lese","liest","liest","lesen","lest","lesen"),
-    _V("schreiben","scrivere","schreibe","schreibst","schreibt","schreiben","schreibt","schreiben"),
-    _V("nehmen","prendere","nehme","nimmst","nimmt","nehmen","nehmt","nehmen"),
-    _V("geben","dare","gebe","gibst","gibt","geben","gebt","geben"),
-    _V("wissen","sapere","weiß","weißt","weiß","wissen","wisst","wissen"),
-    _V("schlafen","dormire","schlafe","schläfst","schläft","schlafen","schlaft","schlafen"),
-    _V("helfen","aiutare","helfe","hilfst","hilft","helfen","helft","helfen"),
-    _V("können","potere","kann","kannst","kann","können","könnt","können"),
-    _V("müssen","dovere","muss","musst","muss","müssen","müsst","müssen"),
-    _V("wollen","volere","will","willst","will","wollen","wollt","wollen"),
-    _V("dürfen","potere (perm.)","darf","darfst","darf","dürfen","dürft","dürfen"),
-    _V("sollen","dover (obbligo)","soll","sollst","soll","sollen","sollt","sollen"),
-    _V("mögen","piacere","mag","magst","mag","mögen","mögt","mögen"),
-    _V("arbeiten","lavorare","arbeite","arbeitest","arbeitet","arbeiten","arbeitet","arbeiten"),
-    _V("finden","trovare","finde","findest","findet","finden","findet","finden"),
-    _V("denken","pensare","denke","denkst","denkt","denken","denkt","denken"),
-    _V("kaufen","comprare","kaufe","kaufst","kauft","kaufen","kauft","kaufen"),
-  ],
-  "Perfekt": [
-    _V("sein","essere","bin gewesen","bist gewesen","ist gewesen","sind gewesen","seid gewesen","sind gewesen"),
-    _V("haben","avere","habe gehabt","hast gehabt","hat gehabt","haben gehabt","habt gehabt","haben gehabt"),
-    _V("werden","diventare","bin geworden","bist geworden","ist geworden","sind geworden","seid geworden","sind geworden"),
-    _V("gehen","andare","bin gegangen","bist gegangen","ist gegangen","sind gegangen","seid gegangen","sind gegangen"),
-    _V("kommen","venire","bin gekommen","bist gekommen","ist gekommen","sind gekommen","seid gekommen","sind gekommen"),
-    _V("fahren","guidare","bin gefahren","bist gefahren","ist gefahren","sind gefahren","seid gefahren","sind gefahren"),
-    _V("laufen","correre","bin gelaufen","bist gelaufen","ist gelaufen","sind gelaufen","seid gelaufen","sind gelaufen"),
-    _V("machen","fare","habe gemacht","hast gemacht","hat gemacht","haben gemacht","habt gemacht","haben gemacht"),
-    _V("kaufen","comprare","habe gekauft","hast gekauft","hat gekauft","haben gekauft","habt gekauft","haben gekauft"),
-    _V("sprechen","parlare","habe gesprochen","hast gesprochen","hat gesprochen","haben gesprochen","habt gesprochen","haben gesprochen"),
-    _V("essen","mangiare","habe gegessen","hast gegessen","hat gegessen","haben gegessen","habt gegessen","haben gegessen"),
-    _V("trinken","bere","habe getrunken","hast getrunken","hat getrunken","haben getrunken","habt getrunken","haben getrunken"),
-    _V("sehen","vedere","habe gesehen","hast gesehen","hat gesehen","haben gesehen","habt gesehen","haben gesehen"),
-    _V("lesen","leggere","habe gelesen","hast gelesen","hat gelesen","haben gelesen","habt gelesen","haben gelesen"),
-    _V("schreiben","scrivere","habe geschrieben","hast geschrieben","hat geschrieben","haben geschrieben","habt geschrieben","haben geschrieben"),
-    _V("nehmen","prendere","habe genommen","hast genommen","hat genommen","haben genommen","habt genommen","haben genommen"),
-    _V("geben","dare","habe gegeben","hast gegeben","hat gegeben","haben gegeben","habt gegeben","haben gegeben"),
-    _V("schlafen","dormire","habe geschlafen","hast geschlafen","hat geschlafen","haben geschlafen","habt geschlafen","haben geschlafen"),
-    _V("arbeiten","lavorare","habe gearbeitet","hast gearbeitet","hat gearbeitet","haben gearbeitet","habt gearbeitet","haben gearbeitet"),
-    _V("lernen","imparare","habe gelernt","hast gelernt","hat gelernt","haben gelernt","habt gelernt","haben gelernt"),
-    _V("wohnen","abitare","habe gewohnt","hast gewohnt","hat gewohnt","haben gewohnt","habt gewohnt","haben gewohnt"),
-    _V("helfen","aiutare","habe geholfen","hast geholfen","hat geholfen","haben geholfen","habt geholfen","haben geholfen"),
-    _V("finden","trovare","habe gefunden","hast gefunden","hat gefunden","haben gefunden","habt gefunden","haben gefunden"),
-    _V("denken","pensare","habe gedacht","hast gedacht","hat gedacht","haben gedacht","habt gedacht","haben gedacht"),
-  ],
-  "Präteritum": [
-    _V("sein","essere","war","warst","war","waren","wart","waren"),
-    _V("haben","avere","hatte","hattest","hatte","hatten","hattet","hatten"),
-    _V("werden","diventare","wurde","wurdest","wurde","wurden","wurdet","wurden"),
-    _V("können","potere","konnte","konntest","konnte","konnten","konntet","konnten"),
-    _V("müssen","dovere","musste","musstest","musste","mussten","musstet","mussten"),
-    _V("wollen","volere","wollte","wolltest","wollte","wollten","wolltet","wollten"),
-    _V("dürfen","potere (perm.)","durfte","durftest","durfte","durften","durftet","durften"),
-    _V("sollen","dover (obbligo)","sollte","solltest","sollte","sollten","solltet","sollten"),
-    _V("mögen","piacere","mochte","mochtest","mochte","mochten","mochtet","mochten"),
-    _V("gehen","andare","ging","gingst","ging","gingen","gingt","gingen"),
-    _V("kommen","venire","kam","kamst","kam","kamen","kamt","kamen"),
-    _V("sehen","vedere","sah","sahst","sah","sahen","saht","sahen"),
-    _V("geben","dare","gab","gabst","gab","gaben","gabt","gaben"),
-    _V("nehmen","prendere","nahm","nahmst","nahm","nahmen","nahmt","nahmen"),
-    _V("fahren","guidare","fuhr","fuhrst","fuhr","fuhren","fuhrt","fuhren"),
-    _V("laufen","correre","lief","liefst","lief","liefen","lieft","liefen"),
-    _V("sprechen","parlare","sprach","sprachst","sprach","sprachen","spracht","sprachen"),
-    _V("schreiben","scrivere","schrieb","schriebst","schrieb","schrieben","schriebt","schrieben"),
-    _V("finden","trovare","fand","fandst","fand","fanden","fandet","fanden"),
-    _V("wissen","sapere","wusste","wusstest","wusste","wussten","wusstet","wussten"),
-    _V("stehen","stare in piedi","stand","standst","stand","standen","standet","standen"),
-    _V("essen","mangiare","aß","aßest","aß","aßen","aßt","aßen"),
-    _V("trinken","bere","trank","trankst","trank","tranken","trankt","tranken"),
-  ],
-  "Konjunktiv II": [
-    _V("sein","essere","wäre","wärst","wäre","wären","wärt","wären"),
-    _V("haben","avere","hätte","hättest","hätte","hätten","hättet","hätten"),
-    _V("werden","diventare","würde","würdest","würde","würden","würdet","würden"),
-    _V("können","potere","könnte","könntest","könnte","könnten","könntet","könnten"),
-    _V("müssen","dovere","müsste","müsstest","müsste","müssten","müsstet","müssten"),
-    _V("dürfen","potere (perm.)","dürfte","dürftest","dürfte","dürften","dürftet","dürften"),
-    _V("sollen","dover (obbligo)","sollte","solltest","sollte","sollten","solltet","sollten"),
-    _V("wollen","volere","wollte","wolltest","wollte","wollten","wolltet","wollten"),
-    _V("mögen","piacere","möchte","möchtest","möchte","möchten","möchtet","möchten"),
-    _V("wissen","sapere","wüsste","wüsstest","wüsste","wüssten","wüsstet","wüssten"),
-    _V("gehen","andare","ginge","gingest","ginge","gingen","ginget","gingen"),
-    _V("kommen","venire","käme","kämest","käme","kämen","kämet","kämen"),
-    _V("geben","dare","gäbe","gäbest","gäbe","gäben","gäbet","gäben"),
-    _V("nehmen","prendere","nähme","nähmest","nähme","nähmen","nähmet","nähmen"),
-    _V("fahren","guidare","führe","führest","führe","führen","führet","führen"),
-    _V("sehen","vedere","sähe","sähest","sähe","sähen","sähet","sähen"),
-  ],
+const VERB_DATA = {
+  sein:       { it:"essere",              Präsens:["bin","bist","ist","sind","seid","sind"],                    Perfekt:["bin gewesen","bist gewesen","ist gewesen","sind gewesen","seid gewesen","sind gewesen"],           Präteritum:["war","warst","war","waren","wart","waren"],                                              "Konjunktiv II":["wäre","wärst","wäre","wären","wärt","wären"] },
+  haben:      { it:"avere",               Präsens:["habe","hast","hat","haben","habt","haben"],                 Perfekt:["habe gehabt","hast gehabt","hat gehabt","haben gehabt","habt gehabt","haben gehabt"],             Präteritum:["hatte","hattest","hatte","hatten","hattet","hatten"],                                    "Konjunktiv II":["hätte","hättest","hätte","hätten","hättet","hätten"] },
+  werden:     { it:"diventare",           Präsens:["werde","wirst","wird","werden","werdet","werden"],           Perfekt:["bin geworden","bist geworden","ist geworden","sind geworden","seid geworden","sind geworden"],     Präteritum:["wurde","wurdest","wurde","wurden","wurdet","wurden"],                                    "Konjunktiv II":["würde","würdest","würde","würden","würdet","würden"] },
+  können:     { it:"potere / saper fare", Präsens:["kann","kannst","kann","können","könnt","können"],            Perfekt:["habe gekonnt","hast gekonnt","hat gekonnt","haben gekonnt","habt gekonnt","haben gekonnt"],         Präteritum:["konnte","konntest","konnte","konnten","konntet","konnten"],                              "Konjunktiv II":["könnte","könntest","könnte","könnten","könntet","könnten"] },
+  müssen:     { it:"dovere (obbligo)",    Präsens:["muss","musst","muss","müssen","müsst","müssen"],             Perfekt:["habe gemusst","hast gemusst","hat gemusst","haben gemusst","habt gemusst","haben gemusst"],         Präteritum:["musste","musstest","musste","mussten","musstet","mussten"],                              "Konjunktiv II":["müsste","müsstest","müsste","müssten","müsstet","müssten"] },
+  wollen:     { it:"volere",              Präsens:["will","willst","will","wollen","wollt","wollen"],            Perfekt:["habe gewollt","hast gewollt","hat gewollt","haben gewollt","habt gewollt","haben gewollt"],         Präteritum:["wollte","wolltest","wollte","wollten","wolltet","wollten"],                              "Konjunktiv II":["wollte","wolltest","wollte","wollten","wolltet","wollten"] },
+  dürfen:     { it:"potere (permesso)",   Präsens:["darf","darfst","darf","dürfen","dürft","dürfen"],            Perfekt:["habe gedurft","hast gedurft","hat gedurft","haben gedurft","habt gedurft","haben gedurft"],         Präteritum:["durfte","durftest","durfte","durften","durftet","durften"],                              "Konjunktiv II":["dürfte","dürftest","dürfte","dürften","dürftet","dürften"] },
+  sollen:     { it:"dover (per altri)",   Präsens:["soll","sollst","soll","sollen","sollt","sollen"],            Perfekt:["habe gesollt","hast gesollt","hat gesollt","haben gesollt","habt gesollt","haben gesollt"],         Präteritum:["sollte","solltest","sollte","sollten","solltet","sollten"],                              "Konjunktiv II":["sollte","solltest","sollte","sollten","solltet","sollten"] },
+  mögen:      { it:"piacere / gradire",   Präsens:["mag","magst","mag","mögen","mögt","mögen"],                  Perfekt:["habe gemocht","hast gemocht","hat gemocht","haben gemocht","habt gemocht","haben gemocht"],           Präteritum:["mochte","mochtest","mochte","mochten","mochtet","mochten"],                              "Konjunktiv II":["möchte","möchtest","möchte","möchten","möchtet","möchten"] },
+  gehen:      { it:"andare",              Präsens:["gehe","gehst","geht","gehen","geht","gehen"],                Perfekt:["bin gegangen","bist gegangen","ist gegangen","sind gegangen","seid gegangen","sind gegangen"],     Präteritum:["ging","gingst","ging","gingen","gingt","gingen"],                                        "Konjunktiv II":["würde gehen","würdest gehen","würde gehen","würden gehen","würdet gehen","würden gehen"] },
+  kommen:     { it:"venire",              Präsens:["komme","kommst","kommt","kommen","kommt","kommen"],          Perfekt:["bin gekommen","bist gekommen","ist gekommen","sind gekommen","seid gekommen","sind gekommen"],     Präteritum:["kam","kamst","kam","kamen","kamt","kamen"],                                              "Konjunktiv II":["würde kommen","würdest kommen","würde kommen","würden kommen","würdet kommen","würden kommen"] },
+  fahren:     { it:"guidare / andare",    Präsens:["fahre","fährst","fährt","fahren","fahrt","fahren"],          Perfekt:["bin gefahren","bist gefahren","ist gefahren","sind gefahren","seid gefahren","sind gefahren"],     Präteritum:["fuhr","fuhrst","fuhr","fuhren","fuhrt","fuhren"],                                        "Konjunktiv II":["würde fahren","würdest fahren","würde fahren","würden fahren","würdet fahren","würden fahren"] },
+  laufen:     { it:"correre / camminare", Präsens:["laufe","läufst","läuft","laufen","lauft","laufen"],          Perfekt:["bin gelaufen","bist gelaufen","ist gelaufen","sind gelaufen","seid gelaufen","sind gelaufen"],     Präteritum:["lief","liefst","lief","liefen","lieft","liefen"],                                        "Konjunktiv II":["würde laufen","würdest laufen","würde laufen","würden laufen","würdet laufen","würden laufen"] },
+  sprechen:   { it:"parlare",             Präsens:["spreche","sprichst","spricht","sprechen","sprecht","sprechen"],Perfekt:["habe gesprochen","hast gesprochen","hat gesprochen","haben gesprochen","habt gesprochen","haben gesprochen"],Präteritum:["sprach","sprachst","sprach","sprachen","spracht","sprachen"],                          "Konjunktiv II":["würde sprechen","würdest sprechen","würde sprechen","würden sprechen","würdet sprechen","würden sprechen"] },
+  essen:      { it:"mangiare",            Präsens:["esse","isst","isst","essen","esst","essen"],                 Perfekt:["habe gegessen","hast gegessen","hat gegessen","haben gegessen","habt gegessen","haben gegessen"],   Präteritum:["aß","aßest","aß","aßen","aßt","aßen"],                                                  "Konjunktiv II":["würde essen","würdest essen","würde essen","würden essen","würdet essen","würden essen"] },
+  trinken:    { it:"bere",                Präsens:["trinke","trinkst","trinkt","trinken","trinkt","trinken"],    Perfekt:["habe getrunken","hast getrunken","hat getrunken","haben getrunken","habt getrunken","haben getrunken"],Präteritum:["trank","trankst","trank","tranken","trankt","tranken"],                                "Konjunktiv II":["würde trinken","würdest trinken","würde trinken","würden trinken","würdet trinken","würden trinken"] },
+  schlafen:   { it:"dormire",             Präsens:["schlafe","schläfst","schläft","schlafen","schlaft","schlafen"],Perfekt:["habe geschlafen","hast geschlafen","hat geschlafen","haben geschlafen","habt geschlafen","haben geschlafen"],Präteritum:["schlief","schliefst","schlief","schliefen","schlieft","schliefen"],                "Konjunktiv II":["würde schlafen","würdest schlafen","würde schlafen","würden schlafen","würdet schlafen","würden schlafen"] },
+  sehen:      { it:"vedere",              Präsens:["sehe","siehst","sieht","sehen","seht","sehen"],              Perfekt:["habe gesehen","hast gesehen","hat gesehen","haben gesehen","habt gesehen","haben gesehen"],         Präteritum:["sah","sahst","sah","sahen","saht","sahen"],                                              "Konjunktiv II":["würde sehen","würdest sehen","würde sehen","würden sehen","würdet sehen","würden sehen"] },
+  lesen:      { it:"leggere",             Präsens:["lese","liest","liest","lesen","lest","lesen"],               Perfekt:["habe gelesen","hast gelesen","hat gelesen","haben gelesen","habt gelesen","haben gelesen"],         Präteritum:["las","lasest","las","lasen","last","lasen"],                                             "Konjunktiv II":["würde lesen","würdest lesen","würde lesen","würden lesen","würdet lesen","würden lesen"] },
+  schreiben:  { it:"scrivere",            Präsens:["schreibe","schreibst","schreibt","schreiben","schreibt","schreiben"],Perfekt:["habe geschrieben","hast geschrieben","hat geschrieben","haben geschrieben","habt geschrieben","haben geschrieben"],Präteritum:["schrieb","schriebst","schrieb","schrieben","schriebt","schrieben"],          "Konjunktiv II":["würde schreiben","würdest schreiben","würde schreiben","würden schreiben","würdet schreiben","würden schreiben"] },
+  nehmen:     { it:"prendere",            Präsens:["nehme","nimmst","nimmt","nehmen","nehmt","nehmen"],          Perfekt:["habe genommen","hast genommen","hat genommen","haben genommen","habt genommen","haben genommen"],   Präteritum:["nahm","nahmst","nahm","nahmen","nahmt","nahmen"],                                        "Konjunktiv II":["würde nehmen","würdest nehmen","würde nehmen","würden nehmen","würdet nehmen","würden nehmen"] },
+  geben:      { it:"dare",                Präsens:["gebe","gibst","gibt","geben","gebt","geben"],                Perfekt:["habe gegeben","hast gegeben","hat gegeben","haben gegeben","habt gegeben","haben gegeben"],         Präteritum:["gab","gabst","gab","gaben","gabt","gaben"],                                              "Konjunktiv II":["würde geben","würdest geben","würde geben","würden geben","würdet geben","würden geben"] },
+  wissen:     { it:"sapere",              Präsens:["weiß","weißt","weiß","wissen","wisst","wissen"],             Perfekt:["habe gewusst","hast gewusst","hat gewusst","haben gewusst","habt gewusst","haben gewusst"],         Präteritum:["wusste","wusstest","wusste","wussten","wusstet","wussten"],                              "Konjunktiv II":["wüsste","wüsstest","wüsste","wüssten","wüsstet","wüssten"] },
+  helfen:     { it:"aiutare",             Präsens:["helfe","hilfst","hilft","helfen","helft","helfen"],          Perfekt:["habe geholfen","hast geholfen","hat geholfen","haben geholfen","habt geholfen","haben geholfen"],   Präteritum:["half","halfst","half","halfen","halft","halfen"],                                        "Konjunktiv II":["würde helfen","würdest helfen","würde helfen","würden helfen","würdet helfen","würden helfen"] },
+  finden:     { it:"trovare",             Präsens:["finde","findest","findet","finden","findet","finden"],       Perfekt:["habe gefunden","hast gefunden","hat gefunden","haben gefunden","habt gefunden","haben gefunden"],   Präteritum:["fand","fandst","fand","fanden","fandet","fanden"],                                       "Konjunktiv II":["würde finden","würdest finden","würde finden","würden finden","würdet finden","würden finden"] },
+  stehen:     { it:"stare in piedi",      Präsens:["stehe","stehst","steht","stehen","steht","stehen"],          Perfekt:["habe gestanden","hast gestanden","hat gestanden","haben gestanden","habt gestanden","haben gestanden"],Präteritum:["stand","standst","stand","standen","standet","standen"],                              "Konjunktiv II":["würde stehen","würdest stehen","würde stehen","würden stehen","würdet stehen","würden stehen"] },
+  sitzen:     { it:"essere seduto",       Präsens:["sitze","sitzt","sitzt","sitzen","sitzt","sitzen"],           Perfekt:["habe gesessen","hast gesessen","hat gesessen","haben gesessen","habt gesessen","haben gesessen"],   Präteritum:["saß","saßest","saß","saßen","saßt","saßen"],                                             "Konjunktiv II":["würde sitzen","würdest sitzen","würde sitzen","würden sitzen","würdet sitzen","würden sitzen"] },
+  liegen:     { it:"essere sdraiato",     Präsens:["liege","liegst","liegt","liegen","liegt","liegen"],          Perfekt:["habe gelegen","hast gelegen","hat gelegen","haben gelegen","habt gelegen","haben gelegen"],         Präteritum:["lag","lagst","lag","lagen","lagt","lagen"],                                              "Konjunktiv II":["würde liegen","würdest liegen","würde liegen","würden liegen","würdet liegen","würden liegen"] },
+  bringen:    { it:"portare",             Präsens:["bringe","bringst","bringt","bringen","bringt","bringen"],    Perfekt:["habe gebracht","hast gebracht","hat gebracht","haben gebracht","habt gebracht","haben gebracht"],   Präteritum:["brachte","brachtest","brachte","brachten","brachtet","brachten"],                        "Konjunktiv II":["würde bringen","würdest bringen","würde bringen","würden bringen","würdet bringen","würden bringen"] },
+  kennen:     { it:"conoscere",           Präsens:["kenne","kennst","kennt","kennen","kennt","kennen"],          Perfekt:["habe gekannt","hast gekannt","hat gekannt","haben gekannt","habt gekannt","haben gekannt"],         Präteritum:["kannte","kanntest","kannte","kannten","kanntet","kannten"],                              "Konjunktiv II":["würde kennen","würdest kennen","würde kennen","würden kennen","würdet kennen","würden kennen"] },
+  denken:     { it:"pensare",             Präsens:["denke","denkst","denkt","denken","denkt","denken"],          Perfekt:["habe gedacht","hast gedacht","hat gedacht","haben gedacht","habt gedacht","haben gedacht"],         Präteritum:["dachte","dachtest","dachte","dachten","dachtet","dachten"],                              "Konjunktiv II":["würde denken","würdest denken","würde denken","würden denken","würdet denken","würden denken"] },
+  verstehen:  { it:"capire",              Präsens:["verstehe","verstehst","versteht","verstehen","versteht","verstehen"],Perfekt:["habe verstanden","hast verstanden","hat verstanden","haben verstanden","habt verstanden","haben verstanden"],Präteritum:["verstand","verstandst","verstand","verstanden","verstandet","verstanden"],      "Konjunktiv II":["würde verstehen","würdest verstehen","würde verstehen","würden verstehen","würdet verstehen","würden verstehen"] },
+  machen:     { it:"fare",                Präsens:["mache","machst","macht","machen","macht","machen"],          Perfekt:["habe gemacht","hast gemacht","hat gemacht","haben gemacht","habt gemacht","haben gemacht"],         Präteritum:["machte","machtest","machte","machten","machtet","machten"],                              "Konjunktiv II":["würde machen","würdest machen","würde machen","würden machen","würdet machen","würden machen"] },
+  kaufen:     { it:"comprare",            Präsens:["kaufe","kaufst","kauft","kaufen","kauft","kaufen"],          Perfekt:["habe gekauft","hast gekauft","hat gekauft","haben gekauft","habt gekauft","haben gekauft"],         Präteritum:["kaufte","kauftest","kaufte","kauften","kauftet","kauften"],                              "Konjunktiv II":["würde kaufen","würdest kaufen","würde kaufen","würden kaufen","würdet kaufen","würden kaufen"] },
+  lernen:     { it:"imparare",            Präsens:["lerne","lernst","lernt","lernen","lernt","lernen"],          Perfekt:["habe gelernt","hast gelernt","hat gelernt","haben gelernt","habt gelernt","haben gelernt"],         Präteritum:["lernte","lerntest","lernte","lernten","lerntet","lernten"],                              "Konjunktiv II":["würde lernen","würdest lernen","würde lernen","würden lernen","würdet lernen","würden lernen"] },
+  arbeiten:   { it:"lavorare",            Präsens:["arbeite","arbeitest","arbeitet","arbeiten","arbeitet","arbeiten"],Perfekt:["habe gearbeitet","hast gearbeitet","hat gearbeitet","haben gearbeitet","habt gearbeitet","haben gearbeitet"],Präteritum:["arbeitete","arbeitetest","arbeitete","arbeiteten","arbeitetet","arbeiteten"],      "Konjunktiv II":["würde arbeiten","würdest arbeiten","würde arbeiten","würden arbeiten","würdet arbeiten","würden arbeiten"] },
+  wohnen:     { it:"abitare",             Präsens:["wohne","wohnst","wohnt","wohnen","wohnt","wohnen"],          Perfekt:["habe gewohnt","hast gewohnt","hat gewohnt","haben gewohnt","habt gewohnt","haben gewohnt"],         Präteritum:["wohnte","wohntest","wohnte","wohnten","wohntet","wohnten"],                              "Konjunktiv II":["würde wohnen","würdest wohnen","würde wohnen","würden wohnen","würdet wohnen","würden wohnen"] },
+  spielen:    { it:"giocare",             Präsens:["spiele","spielst","spielt","spielen","spielt","spielen"],    Perfekt:["habe gespielt","hast gespielt","hat gespielt","haben gespielt","habt gespielt","haben gespielt"],   Präteritum:["spielte","spieltest","spielte","spielten","spieltet","spielten"],                        "Konjunktiv II":["würde spielen","würdest spielen","würde spielen","würden spielen","würdet spielen","würden spielen"] },
+  kochen:     { it:"cucinare",            Präsens:["koche","kochst","kocht","kochen","kocht","kochen"],          Perfekt:["habe gekocht","hast gekocht","hat gekocht","haben gekocht","habt gekocht","haben gekocht"],         Präteritum:["kochte","kochtest","kochte","kochten","kochtet","kochten"],                              "Konjunktiv II":["würde kochen","würdest kochen","würde kochen","würden kochen","würdet kochen","würden kochen"] },
+  hören:      { it:"sentire / ascoltare", Präsens:["höre","hörst","hört","hören","hört","hören"],                Perfekt:["habe gehört","hast gehört","hat gehört","haben gehört","habt gehört","haben gehört"],             Präteritum:["hörte","hörtest","hörte","hörten","hörtet","hörten"],                                   "Konjunktiv II":["würde hören","würdest hören","würde hören","würden hören","würdet hören","würden hören"] },
+  sagen:      { it:"dire",                Präsens:["sage","sagst","sagt","sagen","sagt","sagen"],                Perfekt:["habe gesagt","hast gesagt","hat gesagt","haben gesagt","habt gesagt","haben gesagt"],             Präteritum:["sagte","sagtest","sagte","sagten","sagtet","sagten"],                                    "Konjunktiv II":["würde sagen","würdest sagen","würde sagen","würden sagen","würdet sagen","würden sagen"] },
+  fragen:     { it:"chiedere",            Präsens:["frage","fragst","fragt","fragen","fragt","fragen"],          Perfekt:["habe gefragt","hast gefragt","hat gefragt","haben gefragt","habt gefragt","haben gefragt"],         Präteritum:["fragte","fragtest","fragte","fragten","fragtet","fragten"],                              "Konjunktiv II":["würde fragen","würdest fragen","würde fragen","würden fragen","würdet fragen","würden fragen"] },
+  antworten:  { it:"rispondere",          Präsens:["antworte","antwortest","antwortet","antworten","antwortet","antworten"],Perfekt:["habe geantwortet","hast geantwortet","hat geantwortet","haben geantwortet","habt geantwortet","haben geantwortet"],Präteritum:["antwortete","antwortetest","antwortete","antworteten","antwortetet","antworteten"],"Konjunktiv II":["würde antworten","würdest antworten","würde antworten","würden antworten","würdet antworten","würden antworten"] },
+  suchen:     { it:"cercare",             Präsens:["suche","suchst","sucht","suchen","sucht","suchen"],          Perfekt:["habe gesucht","hast gesucht","hat gesucht","haben gesucht","habt gesucht","haben gesucht"],         Präteritum:["suchte","suchtest","suchte","suchten","suchtet","suchten"],                              "Konjunktiv II":["würde suchen","würdest suchen","würde suchen","würden suchen","würdet suchen","würden suchen"] },
+  brauchen:   { it:"avere bisogno di",    Präsens:["brauche","brauchst","braucht","brauchen","braucht","brauchen"],Perfekt:["habe gebraucht","hast gebraucht","hat gebraucht","haben gebraucht","habt gebraucht","haben gebraucht"],Präteritum:["brauchte","brauchtest","brauchte","brauchten","brauchtet","brauchten"],              "Konjunktiv II":["würde brauchen","würdest brauchen","würde brauchen","würden brauchen","würdet brauchen","würden brauchen"] },
+  öffnen:     { it:"aprire",              Präsens:["öffne","öffnest","öffnet","öffnen","öffnet","öffnen"],       Perfekt:["habe geöffnet","hast geöffnet","hat geöffnet","haben geöffnet","habt geöffnet","haben geöffnet"],   Präteritum:["öffnete","öffnetest","öffnete","öffneten","öffnetet","öffneten"],                        "Konjunktiv II":["würde öffnen","würdest öffnen","würde öffnen","würden öffnen","würdet öffnen","würden öffnen"] },
+  stellen:    { it:"mettere / porre",     Präsens:["stelle","stellst","stellt","stellen","stellt","stellen"],    Perfekt:["habe gestellt","hast gestellt","hat gestellt","haben gestellt","habt gestellt","haben gestellt"],   Präteritum:["stellte","stelltest","stellte","stellten","stelltet","stellten"],                        "Konjunktiv II":["würde stellen","würdest stellen","würde stellen","würden stellen","würdet stellen","würden stellen"] },
+  zeigen:     { it:"mostrare",            Präsens:["zeige","zeigst","zeigt","zeigen","zeigt","zeigen"],          Perfekt:["habe gezeigt","hast gezeigt","hat gezeigt","haben gezeigt","habt gezeigt","haben gezeigt"],         Präteritum:["zeigte","zeigtest","zeigte","zeigten","zeigtet","zeigten"],                              "Konjunktiv II":["würde zeigen","würdest zeigen","würde zeigen","würden zeigen","würdet zeigen","würden zeigen"] },
+  glauben:    { it:"credere",             Präsens:["glaube","glaubst","glaubt","glauben","glaubt","glauben"],    Perfekt:["habe geglaubt","hast geglaubt","hat geglaubt","haben geglaubt","habt geglaubt","haben geglaubt"],   Präteritum:["glaubte","glaubtest","glaubte","glaubten","glaubtet","glaubten"],                        "Konjunktiv II":["würde glauben","würdest glauben","würde glauben","würden glauben","würdet glauben","würden glauben"] },
+  warten:     { it:"aspettare",           Präsens:["warte","wartest","wartet","warten","wartet","warten"],       Perfekt:["habe gewartet","hast gewartet","hat gewartet","haben gewartet","habt gewartet","haben gewartet"],   Präteritum:["wartete","wartetest","wartete","warteten","wartetet","warteten"],                        "Konjunktiv II":["würde warten","würdest warten","würde warten","würden warten","würdet warten","würden warten"] },
+  beginnen:   { it:"iniziare",            Präsens:["beginne","beginnst","beginnt","beginnen","beginnt","beginnen"],Perfekt:["habe begonnen","hast begonnen","hat begonnen","haben begonnen","habt begonnen","haben begonnen"],Präteritum:["begann","begannst","begann","begannen","begannt","begannen"],                            "Konjunktiv II":["würde beginnen","würdest beginnen","würde beginnen","würden beginnen","würdet beginnen","würden beginnen"] },
+  vergessen:  { it:"dimenticare",         Präsens:["vergesse","vergisst","vergisst","vergessen","vergesst","vergessen"],Perfekt:["habe vergessen","hast vergessen","hat vergessen","haben vergessen","habt vergessen","haben vergessen"],Präteritum:["vergaß","vergaßest","vergaß","vergaßen","vergaßt","vergaßen"],                    "Konjunktiv II":["würde vergessen","würdest vergessen","würde vergessen","würden vergessen","würdet vergessen","würden vergessen"] },
+  treffen:    { it:"incontrare",          Präsens:["treffe","triffst","trifft","treffen","trefft","treffen"],    Perfekt:["habe getroffen","hast getroffen","hat getroffen","haben getroffen","habt getroffen","haben getroffen"],Präteritum:["traf","trafst","traf","trafen","traft","trafen"],                                       "Konjunktiv II":["würde treffen","würdest treffen","würde treffen","würden treffen","würdet treffen","würden treffen"] },
+  verlieren:  { it:"perdere",             Präsens:["verliere","verlierst","verliert","verlieren","verliert","verlieren"],Perfekt:["habe verloren","hast verloren","hat verloren","haben verloren","habt verloren","haben verloren"],Präteritum:["verlor","verlorst","verlor","verloren","verlort","verloren"],                        "Konjunktiv II":["würde verlieren","würdest verlieren","würde verlieren","würden verlieren","würdet verlieren","würden verlieren"] },
+  gewinnen:   { it:"vincere",             Präsens:["gewinne","gewinnst","gewinnt","gewinnen","gewinnt","gewinnen"],Perfekt:["habe gewonnen","hast gewonnen","hat gewonnen","haben gewonnen","habt gewonnen","haben gewonnen"],Präteritum:["gewann","gewannst","gewann","gewannen","gewannt","gewannen"],                          "Konjunktiv II":["würde gewinnen","würdest gewinnen","würde gewinnen","würden gewinnen","würdet gewinnen","würden gewinnen"] },
+  empfehlen:  { it:"raccomandare",        Präsens:["empfehle","empfiehlst","empfiehlt","empfehlen","empfehlt","empfehlen"],Perfekt:["habe empfohlen","hast empfohlen","hat empfohlen","haben empfohlen","habt empfohlen","haben empfohlen"],Präteritum:["empfahl","empfahlst","empfahl","empfahlen","empfahlt","empfahlen"],              "Konjunktiv II":["würde empfehlen","würdest empfehlen","würde empfehlen","würden empfehlen","würdet empfehlen","würden empfehlen"] },
 };
 
+function buildTenseCards(tense) {
+  return Object.entries(VERB_DATA)
+    .filter(function(e){ return e[1][tense]; })
+    .map(function(e){
+      return { de: e[0], it: e[1].it, forms: e[1][tense], tense: tense,
+               _key: "__tense__" + tense + "||" + e[0] };
+    });
+}
 const GENUS_COLOR = { der: "#2563eb", die: "#dc2626", das: "#16a34a" };
 const GENUS_LABEL = { der: "masc.", die: "fem.", das: "neut." };
 const LEVEL_LABELS = { A1: "A1", A2: "A2", B1: "B1", B2: "B2", Cust: "Cust" };
@@ -1572,8 +1550,7 @@ function makedeck(lvl, filter, cat) {
 }
 
 function makeTenseDeck(tense) {
-  const raw = TENSE_CARDS[tense] || [];
-  const cards = raw.map(c => ({ ...c, _key: `__tense__${tense}||${c.de}` }));
+  const cards = buildTenseCards(tense);
   if (cards.length === 0) return [];
   const data = srsLoad();
   const today = todayStr();
@@ -1641,6 +1618,13 @@ function showTenses() {
   state.tenseMode = true;
   state.tense = null;
   state.category = null;
+  render();
+}
+
+function showTenseGuide() {
+  state.screen = "tense-guide";
+  state.tenseMode = true;
+  state.level = "Tenses";
   render();
 }
 
@@ -1885,9 +1869,9 @@ function render() {
 
   // Tense selection screen
   if (state.screen === "tense-select") {
-    const tenseButtons = Object.keys(TENSE_CARDS).map(function(tense) {
-      const cnt = TENSE_CARDS[tense].length;
-      const keyed = TENSE_CARDS[tense].map(function(c) { return Object.assign({}, c, { _key: "__tense__" + tense + "||" + c.de }); });
+    const tenseButtons = TENSES.map(function(tense) {
+      const keyed = buildTenseCards(tense);
+      const cnt = keyed.length;
       const ts = srsDeckStats(keyed);
       const dueLabel = ts.due > 0 ? '<span style="color:#ea580c"> · 📅' + ts.due + "</span>" : "";
       return '<button class="tense-btn" onclick="startTense(\'' + tense + '\')">' +
@@ -1899,6 +1883,82 @@ function render() {
       ${levelBarHTML}
       <div style="text-align:center;margin-top:14px;font-family:-apple-system,sans-serif;font-size:1.1rem;font-weight:700">🔀 Verb Tenses</div>
       <div class="tense-select-grid">${tenseButtons}</div>
+      <button class="guide-btn" onclick="showTenseGuide()">📖 When to use each tense</button>
+    `;
+    return;
+  }
+
+  // Tense guide screen
+  if (state.screen === "tense-guide") {
+    const guideData = [
+      { tense:"Präsens", color:"#2563eb", when:"Present actions, habits, near future",
+        rules:[
+          "Current state or action: <em>Ich lerne Deutsch.</em>",
+          "Habits: <em>Er spielt jeden Tag Tennis.</em>",
+          "Near future (with time word): <em>Morgen fahre ich nach Berlin.</em>",
+          "Timeless truths: <em>Wasser kocht bei 100°C.</em>"
+        ],
+        key:"Most versatile tense — covers present AND near future" },
+      { tense:"Perfekt", color:"#16a34a", when:"Spoken past — everyday conversation",
+        rules:[
+          "Default past tense in speech and informal writing.",
+          "Formed with: <b>haben/sein + Partizip II</b>",
+          "Use <b>sein</b> for: motion verbs (gehen, kommen, fahren…) and change of state (werden, aufwachen…)",
+          "Use <b>haben</b> for everything else."
+        ],
+        examples:[
+          {de:"Ich habe gegessen.", it:"I ate / I have eaten."},
+          {de:"Sie ist nach Hause gegangen.", it:"She went home."},
+          {de:"Er hat geschlafen.", it:"He slept."},
+        ],
+        key:"DEFAULT past tense in speech — use this 90% of the time" },
+      { tense:"Präteritum", color:"#dc2626", when:"Written/formal past + sein/haben/modals in speech",
+        rules:[
+          "Used in: novels, newspapers, official reports.",
+          "<b>Exception — always use in speech:</b> sein → war, haben → hatte, and all modal verbs.",
+          "Regular verbs: stem + te endings (machte, kaufte…)",
+          "Irregular verbs: vowel change (ging, kam, fuhr…)"
+        ],
+        examples:[
+          {de:"Er war müde. ✓", it:"(never 'er ist müde gewesen' in speech)"},
+          {de:"Ich konnte nicht schlafen. ✓", it:"I couldn't sleep."},
+          {de:"Der Krieg dauerte vier Jahre.", it:"(written — novel/newspaper)"},
+        ],
+        key:"sein / haben / modals → always Präteritum, even in speech" },
+      { tense:"Konjunktiv II", color:"#7c3aed", when:"Polite requests, hypotheticals, wishes",
+        rules:[
+          "<b>Polite requests:</b> könnte, würde, dürfte, hätte, wäre",
+          "<b>Hypothetical 'if':</b> Wenn ich … hätte / wäre / könnte…",
+          "<b>Regular verbs:</b> würde + Infinitiv (würde machen, würde gehen…)",
+          "<b>Special forms:</b> sein→wäre, haben→hätte, werden→würde, modals→könnte/müsste/etc."
+        ],
+        examples:[
+          {de:"Könnten Sie mir helfen?", it:"Could you help me? (polite)"},
+          {de:"Ich würde gerne kommen.", it:"I would like to come."},
+          {de:"Wenn ich Zeit hätte…", it:"If I had time…"},
+          {de:"Das wäre toll!", it:"That would be great!"},
+        ],
+        key:"Polite requests + 'if/would' hypotheticals" },
+    ];
+    const cards = guideData.map(function(g) {
+      const rules = g.rules.map(function(r){ return '<div class="guide-rule">• ' + r + '</div>'; }).join("");
+      const exs = (g.examples||[]).map(function(e){
+        return '<div class="guide-ex"><div class="guide-ex-de">' + e.de + '</div><div class="guide-ex-it">' + e.it + '</div></div>';
+      }).join("");
+      return '<div class="guide-card">' +
+        '<div class="guide-tense-title" style="color:' + g.color + '">' + g.tense + '</div>' +
+        '<div class="guide-tense-when">' + g.when + '</div>' +
+        rules + exs +
+        '<div class="guide-key" style="background:' + g.color + '">' + g.key + '</div>' +
+        '</div>';
+    }).join("");
+    app.innerHTML = `
+      ${headerHTML}
+      ${levelBarHTML}
+      <div class="guide-screen">
+        <button class="cat-back" onclick="showTenses()">← Back to Tenses</button>
+        ${cards}
+      </div>
     `;
     return;
   }
@@ -2079,10 +2139,8 @@ function render() {
     : "";
 
   let srsStatsCards = null;
-  if (state.tenseMode && state.tense && TENSE_CARDS[state.tense]) {
-    srsStatsCards = TENSE_CARDS[state.tense].map(function(c) {
-      return Object.assign({}, c, { _key: "__tense__" + state.tense + "||" + c.de });
-    });
+  if (state.tenseMode && state.tense) {
+    srsStatsCards = buildTenseCards(state.tense);
   } else if (!isCust && CARDS[state.level]) {
     srsStatsCards = CARDS[state.level];
     if (state.category && state.category !== "all")
