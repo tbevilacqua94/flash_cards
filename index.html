@@ -378,6 +378,25 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 0.7rem; color: #ccc; margin-top: 36px; text-align: center;
   }
+
+  /* SRS */
+  .srs-badge {
+    position: absolute; top: 10px; right: 14px;
+    display: flex; gap: 3px; align-items: center;
+  }
+  .srs-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .srs-summary {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.72rem; color: var(--muted); margin-top: 6px;
+  }
+  .srs-chip { display: flex; align-items: center; gap: 4px; font-weight: 600; }
+  .srs-reset {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.72rem; color: #bbb; background: none; border: 1px solid #ddd;
+    border-radius: 20px; padding: 5px 14px; cursor: pointer; margin-top: 12px;
+    -webkit-tap-highlight-color: transparent;
+  }
 </style>
 </head>
 <body>
@@ -387,44 +406,108 @@
 // Tag helper — wraps cards with category
 function C(cat, cards) { return cards.map(c => ({ ...c, cat })); }
 
+// Compact pipe helper: "der Hund|il cane|der" or "sprechen|parlare|haben+gesprochen" or "groß|grande"
+function P(cat, str) {
+  return str.trim().split('\n').filter(l => l.trim()).map(line => {
+    const [de, it, third] = line.split('|').map(s => s.trim());
+    const card = { de, it, cat };
+    if (third) { if (/^(der|die|das)$/.test(third)) card.genus = third; else card.nota = third; }
+    return card;
+  });
+}
+
 const CARDS = {
   A1: [
-    ...C("famiglia", [
-      { de: "der Mann", it: "l'uomo", genus: "der" },
-      { de: "die Frau", it: "la donna", genus: "die" },
-      { de: "das Kind", it: "il bambino", genus: "das" },
-      { de: "der Freund", it: "l'amico", genus: "der" },
-      { de: "die Freundin", it: "l'amica / la fidanzata", genus: "die" },
-      { de: "der Bruder", it: "il fratello", genus: "der" },
-      { de: "die Schwester", it: "la sorella", genus: "die" },
-      { de: "die Mutter", it: "la madre", genus: "die" },
-      { de: "der Vater", it: "il padre", genus: "der" },
-      { de: "die Tochter", it: "la figlia", genus: "die" },
-      { de: "der Sohn", it: "il figlio", genus: "der" },
-      { de: "die Großmutter", it: "la nonna", genus: "die" },
-      { de: "der Großvater", it: "il nonno", genus: "der" },
-      { de: "der Ehemann", it: "il marito", genus: "der" },
-      { de: "die Ehefrau", it: "la moglie", genus: "die" },
-      { de: "der Onkel", it: "lo zio", genus: "der" },
-      { de: "die Tante", it: "la zia", genus: "die" },
-      { de: "der Lehrer", it: "il professore", genus: "der" },
-      { de: "die Lehrerin", it: "la professoressa", genus: "die" },
-      { de: "der Arzt", it: "il medico", genus: "der" },
-    ]),
-    ...C("corpo", [
-      { de: "der Kopf", it: "la testa", genus: "der" },
-      { de: "der Arm", it: "il braccio", genus: "der" },
-      { de: "das Bein", it: "la gamba", genus: "das" },
-      { de: "die Hand", it: "la mano", genus: "die" },
-      { de: "das Auge", it: "l'occhio", genus: "das" },
-      { de: "die Nase", it: "il naso", genus: "die" },
-      { de: "der Mund", it: "la bocca", genus: "der" },
-      { de: "das Ohr", it: "l'orecchio", genus: "das" },
-      { de: "das Herz", it: "il cuore", genus: "das" },
-      { de: "der Rücken", it: "la schiena", genus: "der" },
-      { de: "der Bauch", it: "la pancia", genus: "der" },
-      { de: "der Finger", it: "il dito", genus: "der" },
-    ]),
+    ...P("famiglia", `
+der Mann|l'uomo|der
+die Frau|la donna|die
+das Kind|il bambino|das
+der Freund|l'amico|der
+die Freundin|l'amica / la fidanzata|die
+der Bruder|il fratello|der
+die Schwester|la sorella|die
+die Mutter|la madre|die
+der Vater|il padre|der
+die Tochter|la figlia|die
+der Sohn|il figlio|der
+die Großmutter|la nonna|die
+der Großvater|il nonno|der
+der Ehemann|il marito|der
+die Ehefrau|la moglie|die
+der Onkel|lo zio|der
+die Tante|la zia|die
+der Lehrer|il professore|der
+die Lehrerin|la professoressa|die
+der Arzt|il medico|der
+der Cousin|il cugino|der
+die Cousine|la cugina|die
+der Neffe|il nipote (di zio)|der
+die Nichte|la nipote (di zio)|die
+der Enkel|il nipote (di nonno)|der
+die Enkelin|la nipote (di nonna)|die
+der Schwieger Vater|il suocero|der
+die Schwiegermutter|la suocera|die
+der Schwager|il cognato|der
+die Schwägerin|la cognata|die
+die Großeltern|i nonni|die
+die Eltern|i genitori|die
+die Geschwister|i fratelli|die
+der Zwilling|il gemello|der
+die Zwillinge|le gemelle|die
+das Baby|il neonato|das
+der Junge|il ragazzo|der
+das Mädchen|la ragazza|das
+der Herr|il signore|der
+die Dame|la signora|die
+der Nachbar|il vicino|der
+die Nachbarin|la vicina|die
+der Gast|l'ospite|der
+die Gäste|gli ospiti|die
+`),
+    ...P("corpo", `
+der Kopf|la testa|der
+der Arm|il braccio|der
+das Bein|la gamba|das
+die Hand|la mano|die
+das Auge|l'occhio|das
+die Nase|il naso|die
+der Mund|la bocca|der
+das Ohr|l'orecchio|das
+das Herz|il cuore|das
+der Rücken|la schiena|der
+der Bauch|la pancia|der
+der Finger|il dito|der
+der Fuß|il piede|der
+das Knie|il ginocchio|das
+die Schulter|la spalla|die
+der Ellbogen|il gomito|der
+das Handgelenk|il polso|das
+der Hals|il collo|der
+die Zehe|il dito del piede|die
+die Zähne|i denti|die
+die Zunge|la lingua|die
+die Lippe|il labbro|die
+das Haar|i capelli|das
+die Haut|la pelle|die
+das Kinn|il mento|das
+die Wange|la guancia|die
+die Stirn|la fronte|die
+der Muskel|il muscolo|der
+der Knochen|l'osso|der
+das Blut|il sangue|das
+die Brust|il petto|die
+die Taille|la vita|die
+die Hüfte|l'anca|die
+der Daumen|il pollice|der
+der Nagel|l'unghia|der
+das Gelenk|l'articolazione|das
+der Fuß|il piede|der
+der Zahn|il dente|der
+die Augen|i occhi|die
+die Ohren|le orecchie|die
+die Hände|le mani|die
+die Finger|le dita|die
+`),
     ...C("casa", [
       { de: "das Haus", it: "la casa", genus: "das" },
       { de: "das Zimmer", it: "la stanza", genus: "das" },
@@ -439,6 +522,20 @@ const CARDS = {
       { de: "das Sofa", it: "il divano", genus: "das" },
       { de: "der Kühlschrank", it: "il frigorifero", genus: "der" },
       { de: "die Treppe", it: "la scala", genus: "die" },
+      { de: "das Badezimmer", it: "il bagno", genus: "das" },
+      { de: "das Wohnzimmer", it: "il salotto", genus: "das" },
+      { de: "das Schlafzimmer", it: "la camera da letto", genus: "das" },
+      { de: "der Balkon", it: "il balcone", genus: "der" },
+      { de: "die Wand", it: "la parete", genus: "die" },
+      { de: "der Boden", it: "il pavimento", genus: "der" },
+      { de: "die Decke", it: "il soffitto", genus: "die" },
+      { de: "der Herd", it: "il fornello", genus: "der" },
+      { de: "die Badewanne", it: "la vasca da bagno", genus: "die" },
+      { de: "die Dusche", it: "la doccia", genus: "die" },
+      { de: "das Waschbecken", it: "il lavandino", genus: "das" },
+      { de: "die Toilette", it: "il gabinetto", genus: "die" },
+      { de: "der Keller", it: "la cantina", genus: "der" },
+      { de: "das Dach", it: "il tetto", genus: "das" },
     ]),
     ...C("cibo", [
       { de: "das Wasser", it: "l'acqua", genus: "das" },
@@ -460,6 +557,28 @@ const CARDS = {
       { de: "das Messer", it: "il coltello", genus: "das" },
       { de: "der Löffel", it: "il cucchiaio", genus: "der" },
       { de: "die Flasche", it: "la bottiglia", genus: "die" },
+      { de: "die Kartoffel", it: "la patata", genus: "die" },
+      { de: "die Nudeln", it: "la pasta", genus: "die" },
+      { de: "der Reis", it: "il riso", genus: "der" },
+      { de: "das Fleisch", it: "la carne", genus: "das" },
+      { de: "das Hühnchen", it: "il pollo", genus: "das" },
+      { de: "der Kuchen", it: "la torta", genus: "der" },
+      { de: "das Eis", it: "il gelato", genus: "das" },
+      { de: "der Saft", it: "il succo", genus: "der" },
+      { de: "der Tee", it: "il tè", genus: "der" },
+      { de: "die Banane", it: "la banana", genus: "die" },
+      { de: "die Orange", it: "l'arancia", genus: "die" },
+      { de: "die Erdbeere", it: "la fragola", genus: "die" },
+      { de: "der Salat", it: "l'insalata", genus: "der" },
+      { de: "die Suppe", it: "la zuppa", genus: "die" },
+      { de: "der Schinken", it: "il prosciutto", genus: "der" },
+      { de: "die Pizza", it: "la pizza", genus: "die" },
+      { de: "die Torte", it: "la torta farcita", genus: "die" },
+      { de: "der Joghurt", it: "lo yogurt", genus: "der" },
+      { de: "die Traube", it: "l'uva", genus: "die" },
+      { de: "die Zwiebel", it: "la cipolla", genus: "die" },
+      { de: "der Knoblauch", it: "l'aglio", genus: "der" },
+      { de: "die Karotte", it: "la carota", genus: "die" },
     ]),
     ...C("animali", [
       { de: "der Hund", it: "il cane", genus: "der" },
@@ -468,6 +587,24 @@ const CARDS = {
       { de: "der Vogel", it: "l'uccello", genus: "der" },
       { de: "das Kamel", it: "il cammello", genus: "das" },
       { de: "der Fisch", it: "il pesce", genus: "der" },
+      { de: "das Pferd", it: "il cavallo", genus: "das" },
+      { de: "die Kuh", it: "la mucca", genus: "die" },
+      { de: "das Schwein", it: "il maiale", genus: "das" },
+      { de: "die Maus", it: "il topo", genus: "die" },
+      { de: "der Hase", it: "il coniglio", genus: "der" },
+      { de: "der Löwe", it: "il leone", genus: "der" },
+      { de: "der Tiger", it: "la tigre", genus: "der" },
+      { de: "der Elefant", it: "l'elefante", genus: "der" },
+      { de: "der Affe", it: "la scimmia", genus: "der" },
+      { de: "der Bär", it: "l'orso", genus: "der" },
+      { de: "die Ente", it: "l'anatra", genus: "die" },
+      { de: "der Schmetterling", it: "la farfalla", genus: "der" },
+      { de: "die Biene", it: "l'ape", genus: "die" },
+      { de: "die Spinne", it: "il ragno", genus: "die" },
+      { de: "der Wolf", it: "il lupo", genus: "der" },
+      { de: "der Fuchs", it: "la volpe", genus: "der" },
+      { de: "das Schaf", it: "la pecora", genus: "das" },
+      { de: "die Ziege", it: "la capra", genus: "die" },
     ]),
     ...C("natura", [
       { de: "der Baum", it: "l'albero", genus: "der" },
@@ -481,6 +618,16 @@ const CARDS = {
       { de: "der Berg", it: "la montagna", genus: "der" },
       { de: "das Meer", it: "il mare", genus: "das" },
       { de: "der Fluss", it: "il fiume", genus: "der" },
+      { de: "der See", it: "il lago", genus: "der" },
+      { de: "der Wald", it: "la foresta", genus: "der" },
+      { de: "die Wiese", it: "il prato", genus: "die" },
+      { de: "das Feuer", it: "il fuoco", genus: "das" },
+      { de: "der Sand", it: "la sabbia", genus: "der" },
+      { de: "das Gras", it: "l'erba", genus: "das" },
+      { de: "der Stein", it: "la pietra", genus: "der" },
+      { de: "die Pflanze", it: "la pianta", genus: "die" },
+      { de: "der Himmel", it: "il cielo", genus: "der" },
+      { de: "das Tal", it: "la valle", genus: "das" },
     ]),
     ...C("citta", [
       { de: "die Stadt", it: "la città", genus: "die" },
@@ -541,6 +688,15 @@ const CARDS = {
       { de: "der Ball", it: "la palla", genus: "der" },
       { de: "das Tor", it: "il gol / la porta", genus: "das" },
       { de: "der Sieg", it: "la vittoria", genus: "der" },
+      { de: "der Fußball", it: "il calcio", genus: "der" },
+      { de: "das Schwimmen", it: "il nuoto", genus: "das" },
+      { de: "das Tennis", it: "il tennis", genus: "das" },
+      { de: "der Basketball", it: "la pallacanestro", genus: "der" },
+      { de: "das Laufen", it: "la corsa", genus: "das" },
+      { de: "die Mannschaft", it: "la squadra", genus: "die" },
+      { de: "das Training", it: "l'allenamento", genus: "das" },
+      { de: "der Sportler", it: "lo sportivo", genus: "der" },
+      { de: "die Niederlage", it: "la sconfitta", genus: "die" },
     ]),
     ...C("verbi", [
       { de: "sein", it: "essere", nota: "sein + gewesen" },
@@ -638,25 +794,87 @@ const CARDS = {
       { de: "der Termin", it: "l'appuntamento", genus: "der" },
       { de: "die Rechnung", it: "il conto", genus: "die" },
       { de: "das Formular", it: "il modulo", genus: "das" },
+      { de: "das Gehalt", it: "lo stipendio", genus: "das" },
+      { de: "der Vertrag", it: "il contratto", genus: "der" },
+      { de: "die Kündigung", it: "il licenziamento", genus: "die" },
+      { de: "die Bewerbung", it: "la candidatura", genus: "die" },
+      { de: "die Aufgabe", it: "il compito", genus: "die" },
+      { de: "der Auftrag", it: "l'incarico", genus: "der" },
+      { de: "die Stelle", it: "il posto di lavoro", genus: "die" },
+      { de: "die Abteilung", it: "il reparto", genus: "die" },
+      { de: "das Vorstellungsgespräch", it: "il colloquio di lavoro", genus: "das" },
     ]),
     ...C("casa", [
       { de: "das Zimmer", it: "la stanza", genus: "das" },
       { de: "das Rezept", it: "la ricetta / la prescrizione", genus: "das" },
+      { de: "die Wohnung", it: "l'appartamento", genus: "die" },
+      { de: "die Miete", it: "l'affitto", genus: "die" },
+      { de: "das Badezimmer", it: "il bagno", genus: "das" },
+      { de: "das Wohnzimmer", it: "il salotto", genus: "das" },
+      { de: "das Schlafzimmer", it: "la camera da letto", genus: "das" },
+      { de: "der Balkon", it: "il balcone", genus: "der" },
+      { de: "der Keller", it: "la cantina", genus: "der" },
+      { de: "das Dach", it: "il tetto", genus: "das" },
+      { de: "der Aufzug", it: "l'ascensore", genus: "der" },
+      { de: "der Herd", it: "il fornello", genus: "der" },
+      { de: "die Dusche", it: "la doccia", genus: "die" },
+      { de: "der Vermieter", it: "il proprietario", genus: "der" },
+      { de: "der Nachbar", it: "il vicino", genus: "der" },
     ]),
     ...C("cibo", [
       { de: "der Preis", it: "il prezzo / il premio", genus: "der" },
       { de: "die Karte", it: "la carta / la cartina", genus: "die" },
+      { de: "die Kartoffel", it: "la patata", genus: "die" },
+      { de: "die Nudeln", it: "la pasta", genus: "die" },
+      { de: "der Reis", it: "il riso", genus: "der" },
+      { de: "das Fleisch", it: "la carne", genus: "das" },
+      { de: "das Hühnchen", it: "il pollo", genus: "das" },
+      { de: "der Kuchen", it: "la torta", genus: "der" },
+      { de: "das Eis", it: "il gelato", genus: "das" },
+      { de: "der Saft", it: "il succo", genus: "der" },
+      { de: "der Tee", it: "il tè", genus: "der" },
+      { de: "die Banane", it: "la banana", genus: "die" },
+      { de: "die Orange", it: "l'arancia", genus: "die" },
+      { de: "die Erdbeere", it: "la fragola", genus: "die" },
+      { de: "der Salat", it: "l'insalata", genus: "der" },
+      { de: "die Suppe", it: "la zuppa", genus: "die" },
+      { de: "der Schinken", it: "il prosciutto", genus: "der" },
+      { de: "die Speisekarte", it: "il menù", genus: "die" },
+      { de: "das Frühstück", it: "la colazione", genus: "das" },
+      { de: "das Mittagessen", it: "il pranzo", genus: "das" },
+      { de: "das Abendessen", it: "la cena", genus: "das" },
     ]),
     ...C("citta", [
       { de: "die Schule", it: "la scuola", genus: "die" },
       { de: "der Unterricht", it: "la lezione", genus: "der" },
       { de: "die Adresse", it: "l'indirizzo", genus: "die" },
+      { de: "das Kino", it: "il cinema", genus: "das" },
+      { de: "das Theater", it: "il teatro", genus: "das" },
+      { de: "die Bank", it: "la banca", genus: "die" },
+      { de: "das Museum", it: "il museo", genus: "das" },
+      { de: "die Bibliothek", it: "la biblioteca", genus: "die" },
+      { de: "das Schwimmbad", it: "la piscina", genus: "das" },
+      { de: "der Spielplatz", it: "il parco giochi", genus: "der" },
+      { de: "die Bäckerei", it: "la panetteria", genus: "die" },
+      { de: "das Kaufhaus", it: "il grande magazzino", genus: "das" },
+      { de: "das Rathaus", it: "il municipio", genus: "das" },
+      { de: "die Polizei", it: "la polizia", genus: "die" },
     ]),
     ...C("viaggi", [
       { de: "der Urlaub", it: "la vacanza", genus: "der" },
       { de: "die Reise", it: "il viaggio", genus: "die" },
       { de: "das Gepäck", it: "i bagagli", genus: "das" },
       { de: "die Unterkunft", it: "l'alloggio", genus: "die" },
+      { de: "der Strand", it: "la spiaggia", genus: "der" },
+      { de: "der Koffer", it: "la valigia", genus: "der" },
+      { de: "das Ticket", it: "il biglietto", genus: "das" },
+      { de: "die Reservierung", it: "la prenotazione", genus: "die" },
+      { de: "der Reisepass", it: "il passaporto", genus: "der" },
+      { de: "die Auskunft", it: "le informazioni", genus: "die" },
+      { de: "die Kamera", it: "la fotocamera", genus: "die" },
+      { de: "die Abfahrt", it: "la partenza", genus: "die" },
+      { de: "die Ankunft", it: "l'arrivo", genus: "die" },
+      { de: "die Verspätung", it: "il ritardo", genus: "die" },
     ]),
     ...C("oggetti", [
       { de: "die Hausaufgabe", it: "il compito a casa", genus: "die" },
@@ -685,6 +903,33 @@ const CARDS = {
       { de: "der Trainer", it: "l'allenatore", genus: "der" },
       { de: "das Team", it: "la squadra", genus: "das" },
       { de: "der Wettbewerb", it: "la competizione", genus: "der" },
+    ]),
+    ...C("salute", [
+      { de: "der Arzt", it: "il medico", genus: "der" },
+      { de: "die Ärztin", it: "la dottoressa", genus: "die" },
+      { de: "das Krankenhaus", it: "l'ospedale", genus: "das" },
+      { de: "die Apotheke", it: "la farmacia", genus: "die" },
+      { de: "die Erkältung", it: "il raffreddore", genus: "die" },
+      { de: "das Fieber", it: "la febbre", genus: "das" },
+      { de: "der Schmerz", it: "il dolore", genus: "der" },
+      { de: "das Medikament", it: "il farmaco", genus: "das" },
+      { de: "die Tablette", it: "la compressa", genus: "die" },
+      { de: "der Termin", it: "l'appuntamento", genus: "der" },
+      { de: "die Versicherung", it: "l'assicurazione", genus: "die" },
+      { de: "gesund", it: "sano" },
+      { de: "krank", it: "malato" },
+    ]),
+    ...C("tecnologia", [
+      { de: "der Computer", it: "il computer", genus: "der" },
+      { de: "das Handy", it: "il cellulare", genus: "das" },
+      { de: "die App", it: "l'app", genus: "die" },
+      { de: "das Internet", it: "internet", genus: "das" },
+      { de: "die E-Mail", it: "l'e-mail", genus: "die" },
+      { de: "das Passwort", it: "la password", genus: "das" },
+      { de: "die Webseite", it: "il sito web", genus: "die" },
+      { de: "das Netzwerk", it: "la rete", genus: "das" },
+      { de: "der Drucker", it: "la stampante", genus: "der" },
+      { de: "die Tastatur", it: "la tastiera", genus: "die" },
     ]),
     ...C("verbi", [
       { de: "sprechen", it: "parlare", nota: "haben + gesprochen" },
@@ -784,6 +1029,14 @@ const CARDS = {
       { de: "der Kollege", it: "il collega", genus: "der" },
       { de: "die Besprechung", it: "la riunione", genus: "die" },
       { de: "der Termin", it: "l'appuntamento", genus: "der" },
+      { de: "das Gehalt", it: "lo stipendio", genus: "das" },
+      { de: "der Vertrag", it: "il contratto", genus: "der" },
+      { de: "die Bewerbung", it: "la candidatura", genus: "die" },
+      { de: "das Vorstellungsgespräch", it: "il colloquio di lavoro", genus: "das" },
+      { de: "der Arbeitsplatz", it: "il posto di lavoro", genus: "der" },
+      { de: "die Kündigung", it: "il licenziamento", genus: "die" },
+      { de: "die Weiterbildung", it: "la formazione professionale", genus: "die" },
+      { de: "die Karriere", it: "la carriera", genus: "die" },
     ]),
     ...C("viaggi", [
       { de: "die Reise", it: "il viaggio", genus: "die" },
@@ -825,10 +1078,40 @@ const CARDS = {
     ...C("corpo", [
       { de: "die Gesundheit", it: "la salute", genus: "die" },
       { de: "das Gefühl", it: "la sensazione / il sentimento", genus: "das" },
+      { de: "die Krankheit", it: "la malattia", genus: "die" },
+      { de: "das Medikament", it: "il farmaco", genus: "das" },
+      { de: "die Erkältung", it: "il raffreddore", genus: "die" },
+      { de: "das Fieber", it: "la febbre", genus: "das" },
+      { de: "die Versicherung", it: "l'assicurazione", genus: "die" },
+      { de: "die Operation", it: "l'operazione", genus: "die" },
+      { de: "der Schmerz", it: "il dolore", genus: "der" },
+      { de: "die Allergie", it: "l'allergia", genus: "die" },
     ]),
     ...C("sport", [
       { de: "der Wettkampf", it: "la gara / la competizione", genus: "der" },
       { de: "die Leistung", it: "la prestazione / la performance", genus: "die" },
+    ]),
+    ...C("salute", [
+      { de: "die Krankheit", it: "la malattia", genus: "die" },
+      { de: "die Operation", it: "l'operazione", genus: "die" },
+      { de: "die Diagnose", it: "la diagnosi", genus: "die" },
+      { de: "die Therapie", it: "la terapia", genus: "die" },
+      { de: "die Ernährung", it: "l'alimentazione", genus: "die" },
+      { de: "die Bewegung", it: "il movimento / l'attività fisica", genus: "die" },
+      { de: "der Stress", it: "lo stress", genus: "der" },
+      { de: "die Erholung", it: "il riposo / la convalescenza", genus: "die" },
+      { de: "die Allergie", it: "l'allergia", genus: "die" },
+      { de: "die Untersuchung", it: "la visita medica", genus: "die" },
+    ]),
+    ...C("tecnologia", [
+      { de: "das Internet", it: "internet", genus: "das" },
+      { de: "die Software", it: "il software", genus: "die" },
+      { de: "die Daten", it: "i dati", genus: "die" },
+      { de: "die Sicherheit", it: "la sicurezza", genus: "die" },
+      { de: "der Download", it: "il download", genus: "der" },
+      { de: "die Datei", it: "il file", genus: "die" },
+      { de: "der Bildschirm", it: "lo schermo", genus: "der" },
+      { de: "die Verbindung", it: "la connessione", genus: "die" },
     ]),
     ...C("verbi", [
       { de: "erklären", it: "spiegare", nota: "haben + erklärt" },
@@ -933,6 +1216,30 @@ const CARDS = {
       { de: "die Transparenz", it: "la trasparenza", genus: "die" },
       { de: "der Kompromiss", it: "il compromesso", genus: "der" },
       { de: "die Glaubwürdigkeit", it: "la credibilità", genus: "die" },
+      { de: "die Digitalisierung", it: "la digitalizzazione", genus: "die" },
+      { de: "die Globalisierung", it: "la globalizzazione", genus: "die" },
+      { de: "die Nachhaltigkeit", it: "la sostenibilità", genus: "die" },
+      { de: "der Klimawandel", it: "il cambiamento climatico", genus: "der" },
+      { de: "die Gleichberechtigung", it: "la parità di diritti", genus: "die" },
+      { de: "die Menschenwürde", it: "la dignità umana", genus: "die" },
+    ]),
+    ...C("salute", [
+      { de: "die Prävention", it: "la prevenzione", genus: "die" },
+      { de: "die Rehabilitation", it: "la riabilitazione", genus: "die" },
+      { de: "die Psychologie", it: "la psicologia", genus: "die" },
+      { de: "das Wohlbefinden", it: "il benessere", genus: "das" },
+      { de: "die Lebenserwartung", it: "l'aspettativa di vita", genus: "die" },
+      { de: "die Nebenwirkung", it: "l'effetto collaterale", genus: "die" },
+    ]),
+    ...C("tecnologia", [
+      { de: "die künstliche Intelligenz", it: "l'intelligenza artificiale", genus: "die" },
+      { de: "der Algorithmus", it: "l'algoritmo", genus: "der" },
+      { de: "die Datenschutz", it: "la protezione dei dati", genus: "die" },
+      { de: "die Plattform", it: "la piattaforma", genus: "die" },
+      { de: "der Nutzer", it: "l'utente", genus: "der" },
+      { de: "die Schnittstelle", it: "l'interfaccia", genus: "die" },
+      { de: "der Server", it: "il server", genus: "der" },
+      { de: "die Cloud", it: "il cloud", genus: "die" },
     ]),
     ...C("verbi", [
       { de: "analysieren", it: "analizzare", nota: "haben + analysiert" },
@@ -1012,6 +1319,8 @@ const CATEGORIES = {
   verbi:     { label: "Verbi",      icon: "📝" },
   aggettivi: { label: "Aggettivi",  icon: "✨" },
   frasi:     { label: "Frasi",      icon: "💬" },
+  salute:    { label: "Salute",     icon: "🏥" },
+  tecnologia:{ label: "Tecnologia", icon: "💻" },
 };
 
 function cardType(c) {
@@ -1031,6 +1340,62 @@ function shuffle(arr) {
 }
 
 const POOL_SIZE = 40;
+const SRS_INTERVALS = [0, 1, 3, 7, 14, 30];
+const SRS_COLORS = ["#dc2626","#ea580c","#ca8a04","#16a34a","#2563eb","#7c3aed"];
+
+function srsLoad() {
+  try { return JSON.parse(localStorage.getItem("fc_srs") || "{}"); } catch { return {}; }
+}
+function srsSave(data) {
+  try { localStorage.setItem("fc_srs", JSON.stringify(data)); } catch {}
+}
+function srsGet(de) {
+  return srsLoad()[de] || { level: 0, nextReview: null, correct: 0, wrong: 0 };
+}
+function srsUpdate(de, correct) {
+  const data = srsLoad();
+  const e = data[de] || { level: 0, nextReview: null, correct: 0, wrong: 0 };
+  if (correct) {
+    e.level = Math.min(5, e.level + 1);
+    e.correct = (e.correct || 0) + 1;
+    const days = SRS_INTERVALS[e.level];
+    if (days > 0) {
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      e.nextReview = d.toISOString().split("T")[0];
+    } else {
+      e.nextReview = null;
+    }
+  } else {
+    e.level = 0;
+    e.wrong = (e.wrong || 0) + 1;
+    e.nextReview = null;
+  }
+  data[de] = e;
+  srsSave(data);
+}
+function todayStr() { return new Date().toISOString().split("T")[0]; }
+function srsDeckStats(cards) {
+  const data = srsLoad();
+  const today = todayStr();
+  let due = 0, unseen = 0, mastered = 0;
+  for (const c of cards) {
+    const e = data[c.de];
+    if (!e) { unseen++; continue; }
+    if (e.level >= 5 && e.nextReview && e.nextReview > today) { mastered++; continue; }
+    if (!e.nextReview || e.nextReview <= today) due++;
+  }
+  return { due, unseen, mastered };
+}
+function srsBadgeHTML(de) {
+  const e = srsGet(de);
+  const lv = e.level;
+  const col = SRS_COLORS[lv];
+  const dots = Array.from({length: 5}, (_, i) =>
+    `<span class="srs-dot" style="background:${i < lv ? col : 'rgba(0,0,0,0.1)'}"></span>`
+  ).join('');
+  return `<div class="srs-badge">${dots}</div>`;
+}
 
 function makedeck(lvl, filter, cat) {
   let cards = lvl === "Cust" ? state.customCards : CARDS[lvl];
@@ -1041,7 +1406,34 @@ function makedeck(lvl, filter, cat) {
   }
   if (cards.length === 0) return [];
   if (lvl === "Cust") return shuffle([...cards]);
-  return shuffle(cards).slice(0, Math.min(POOL_SIZE, cards.length));
+
+  const data = srsLoad();
+  const today = todayStr();
+  const due = [], unseen = [], notDue = [];
+
+  for (const card of cards) {
+    const e = data[card.de];
+    if (!e) { unseen.push(card); continue; }
+    if (!e.nextReview || e.nextReview <= today) due.push({ card, e });
+    else notDue.push({ card, e });
+  }
+
+  due.sort((a, b) => {
+    if (a.e.level !== b.e.level) return a.e.level - b.e.level;
+    if (!a.e.nextReview && !b.e.nextReview) return 0;
+    if (!a.e.nextReview) return -1;
+    if (!b.e.nextReview) return 1;
+    return a.e.nextReview.localeCompare(b.e.nextReview);
+  });
+
+  const result = due.map(x => x.card);
+  if (result.length < POOL_SIZE)
+    result.push(...shuffle(unseen).slice(0, POOL_SIZE - result.length));
+  if (result.length < POOL_SIZE) {
+    notDue.sort((a, b) => a.e.level - b.e.level);
+    result.push(...notDue.map(x => x.card).slice(0, POOL_SIZE - result.length));
+  }
+  return result.slice(0, POOL_SIZE);
 }
 
 function catCount(cat, lvl) {
@@ -1158,15 +1550,22 @@ function nextCard(dir, result) {
   const prevWrong = state.totalWrong;
   let pushedCard = false;
 
+  const currentCard = state.deck[state.index];
+  const prevSRS = (currentCard && state.level !== "Cust")
+    ? { de: currentCard.de, entry: { ...srsGet(currentCard.de) } }
+    : null;
+
   if (result === "correct") {
     state.doneCount++;
+    if (currentCard && state.level !== "Cust") srsUpdate(currentCard.de, true);
   } else if (result === "wrong") {
     state.totalWrong++;
+    if (currentCard && state.level !== "Cust") srsUpdate(currentCard.de, false);
     state.deck.push(state.deck[state.index]);
     pushedCard = true;
   }
 
-  state.lastAction = { prevIndex, prevDone, prevWrong, pushedCard, result };
+  state.lastAction = { prevIndex, prevDone, prevWrong, pushedCard, result, prevSRS };
 
   if (state.doneCount >= state.poolSize) {
     state.finished = true;
@@ -1196,6 +1595,11 @@ function undoLast() {
   state.totalWrong = a.prevWrong;
   state.flipped = false;
   if (a.pushedCard) state.deck.pop();
+  if (a.prevSRS) {
+    const data = srsLoad();
+    data[a.prevSRS.de] = a.prevSRS.entry;
+    srsSave(data);
+  }
   state.animating = false;
   render();
 }
@@ -1368,6 +1772,7 @@ function render() {
     // handled below
   } else if (isDeIt) {
     frontContent = `
+      ${srsBadgeHTML(card.de)}
       ${card.genus ? `<div class="article-badge" style="background:${genusColor}">${card.genus}</div>` : ""}
       ${isVerb ? `<div class="verb-label">VERB</div>` : ""}
       <div class="german-word">${card.de || ""}</div>
@@ -1380,6 +1785,7 @@ function render() {
     `;
   } else {
     frontContent = `
+      ${srsBadgeHTML(card.de)}
       <div class="back-label" style="color:#aaa">🇮🇹 Italian</div>
       <div class="german-word">${card.it || ""}</div>
       <div class="tap-hint">↕ tap to flip</div>
@@ -1407,6 +1813,7 @@ function render() {
           <span style="color:#dc2626">✗ ${state.totalWrong} errate</span>
         </div>
         <button class="restart-btn" onclick="restart()">Ricomincia →</button>
+        <div><button class="srs-reset" onclick="if(confirm('Reset tutti i progressi SRS?')){localStorage.removeItem('fc_srs');restart();}">Azzera progressi SRS</button></div>
       </div>
     `;
   } else {
@@ -1431,9 +1838,27 @@ function render() {
 
   const showFilters = !isCust && !isCatGame;
 
+  let srsStatsCards = null;
+  if (!isCust && CARDS[state.level]) {
+    srsStatsCards = CARDS[state.level];
+    if (state.category && state.category !== "all")
+      srsStatsCards = srsStatsCards.filter(c => c.cat === state.category);
+    else if (state.filter && state.filter !== "all")
+      srsStatsCards = srsStatsCards.filter(c => cardType(c) === state.filter);
+  }
+  const srsStats = srsStatsCards ? srsDeckStats(srsStatsCards) : null;
+  const srsSummaryHTML = srsStats ? `
+    <div class="srs-summary">
+      ${srsStats.due > 0 ? `<div class="srs-chip" style="color:#ea580c">📅 ${srsStats.due} da ripassare</div>` : ''}
+      ${srsStats.unseen > 0 ? `<div class="srs-chip">✨ ${srsStats.unseen} nuove</div>` : ''}
+      <div class="srs-chip" style="color:#7c3aed">⭐ ${srsStats.mastered} padroneggiate</div>
+    </div>
+  ` : '';
+
   app.innerHTML = `
     ${headerHTML}
     ${levelBarHTML}
+    ${srsSummaryHTML}
     ${showFilters ? filtersHTML + legendHTML : ""}
     ${catLabel}
     ${editBtn}
